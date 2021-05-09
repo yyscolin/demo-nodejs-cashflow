@@ -1,0 +1,165 @@
+<%
+if (buttons !== 1 && week !== 1)
+  button1 = {
+    color: '2E64FE',
+    onclick: `window.location.href="/wcfs/${week}"`,
+    cursor: 'pointer'
+  }
+else
+  button1 = {
+    color: 'd3d3d3',
+    onclick: '',
+    cursor: 'default'
+  }
+if (buttons)
+  button2 = {
+    color: '2E64FE',
+    onclick: `window.location.href="/wcfs/${week+2}"`,
+    cursor: 'pointer'
+  }
+else
+  button2 = {
+    color: 'd3d3d3',
+    onclick: '',
+    cursor: 'default'
+  }
+%><!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Exp 11 - Balance</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="/styles/main.css" rel="stylesheet" type="text/css" media="all">
+<link href="/styles/action-buttons.css" rel="stylesheet" type="text/css" media="all">
+<link href="/styles/foot-buttons.css" rel="stylesheet" type="text/css" media="all">
+<link href="/styles/main-header-week.css" rel="stylesheet" type="text/css" media="all">
+<script src='/scripts/deleteDatabaseEntry.js'></script>
+</head>
+<body>
+<% include banner %>
+<div id='main-box'>
+  <div id='main-header-week'>
+    <h1>WECAFO <%=week+1%></h1>
+    <div>
+      <span style='color:#<%=button1.color%>;cursor:<%=button1.cursor%>' onclick='<%=button1.onclick%>'>◀</span>
+      <h3>(<%=dats[0]%> ⇔ <%=dats[1]%>)</h3>
+      <span style='color:#<%=button2.color%>;cursor:<%=button2.cursor%>' onclick='<%=button2.onclick%>'>▶</span>
+    </div>
+  </div>
+  <div>
+    <h3 style='display:inline-block'>BALS</h3>
+    <button class='action-button' onclick="window.open('/bals/form/<%=week+1%>', 'form', 'height=540,width=480')">≡</button>
+  </div>
+  <table id='bals'>
+    <thead>
+      <tr>
+        <th>Kacoon</th>
+        <th>Init</th>
+        <th>Pays</th>
+        <th>Ints</th>
+        <th>Exts</th>
+        <th>Bals</th>
+        <th>Errs</th>
+      </tr>
+    </thead>
+    <tbody><%bals.forEach(bal => {%>
+      <tr>
+        <td><%=bal.acc%></td>
+        <td><%=bal.start%></td>
+        <td><%=bal.pays%></td>
+        <td><%=bal.ints%></td>
+        <td><%=bal.exts%></td>
+        <td><%=bal.balance%></td>
+        <td><%=bal.error%></td>
+      </tr><%})%>
+    </tbody>
+  </table>
+  <div>
+    <h3 style='display:inline-block'>PAYS</h3>
+    <button class='action-button' onclick="window.open('/buys/form', 'form', 'height=560,width=720')" title='Add Entry'>+</button>
+  </div><%if (pays.length) {%>
+  <table>
+    <thead>
+      <tr>
+        <th>dat</th>
+        <th>itm</th>
+        <th>ent</th>
+        <th>acc</th>
+        <th>amt</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody><%pays.forEach(pay => {%>
+      <tr>
+        <td><%=pay.date%></td>
+        <td><%=pay.itm%></td>
+        <td><%=pay.ent%></td>
+        <td><%=pay.acc%></td>
+        <td><%=pay.amt%></td>
+        <td style='text-align: center'>
+          <button class='action-button' title='Edit' onclick='window.open("/buys/form/<%=pay.buy%>", "form", "height=560,width=720")'>≡</button>
+          <button class='action-button' style='color:red' onclick='deleteDatabaseEntry(this, "exp11", "pays", <%=pay.id%>)'>✖</button>
+        </td>
+      </tr><%})%>
+    </tbody>
+  </table><%} else {%>
+  <p>There are no entries to show</p><%}%>
+  <div>
+    <h3 style='display:inline-block'>INTS</h3>
+    <button class='action-button' onclick="window.open('/ints/form', 'form', 'height=400,width=400')" title='Add Entry'>+</button>
+  </div><%if (ints.length) {%>
+  <table>
+    <thead>
+      <tr>
+        <th>dat</th>
+        <th colspan='2'>src</th>
+        <th colspan='2'>des</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody><%ints.forEach(int => {%>
+      <tr>
+        <td><%=int.date%></td>
+        <td><%=int.sr%></td>
+        <td><%=int.sr_amt%></td>
+        <td><%=int.de%></td>
+        <td><%=int.de_amt%></td>
+        <td style='text-align: center'>
+          <button class='action-button' title='Edit' onclick="window.open('/ints/form/<%=int.id%>', 'form', 'height=400,width=400')">≡</button>
+          <button class='action-button' style='color: red' onclick='deleteDatabaseEntry(this, "exp11", "ints", <%=int.id%>)'>✖</button>
+        </td>
+      </tr><%})%>
+    </tbody>
+  </table><%} else {%>
+  <p>There are no entries to show</p><%}%>
+  <div>
+    <h3 style='display:inline-block'>EXTS</h3>
+    <button class='action-button' onclick="window.open('/exts/form', 'form', 'height=440,width=320')" title='Add Entry'>+</button>
+  </div><%if (exts.length) {%>
+  <table>
+    <thead>
+      <tr>
+        <th>dat</th>
+        <th>itm</th>
+        <th>acc</th>
+        <th>amt</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody><%exts.forEach(ext => {%>
+      <tr>
+        <td><%=ext.date%></td>
+        <td><%=ext.tft%></td>
+        <td><%=ext.acc%></td>
+        <td><%=ext.amt%></td>
+        <td style='text-align: center'>
+          <button class='action-button' title='Edit' onclick="window.open('/exts/form/<%=ext.id%>', 'form', 'height=440,width=320')">≡</button>
+          <button class='action-button' style='color: red' onclick='deleteDatabaseEntry(this, "exp11", "exts", <%=ext.id%>)'>✖</button>
+        </td>
+      </tr><%})%>
+    </tbody>
+  </table><%} else {%>
+  <p>There are no entries to show</p><%}%>
+</div>
+</body>
+</html>

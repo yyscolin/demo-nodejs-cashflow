@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Exp11 Acc Form</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="/styles/main.css" rel="stylesheet">
+<link href="/styles/action-buttons.css" rel="stylesheet">
+<link href="/styles/foot-buttons.css" rel="stylesheet">
+<script src='/scripts/form.js'></script>
+<script>
+  function submitForm() {
+    let data = document.querySelectorAll(`select, input`)
+    let payload = {<%if(!isNew) {%>
+      id: <%=acc.id%>,<%}%>
+      name: data[0].value,
+      currency: data[1].value
+    }
+    payload.sendTo('/api/accs', '<%=isNew?'POST':'PUT'%>')
+  }
+</script>
+</head>
+<body>
+<h1>Acc Form</h1>
+<table>
+  <thead>
+    <tr>
+      <th style='text-align: center' colspan='2'><%=isNew?'Entry':'Alteration'%></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Name</td>
+      <td><input type='text'<%-acc.name%>></td>
+    </tr>
+    <tr>
+      <td>Tolecy</td>
+      <td><input type='text'<%-acc.currency%>></td>
+    </tr>
+  </tbody>
+</table>
+<p id='message-box' style='display: none'></p>
+<script>setSuccessMessage()</script>
+<div class='foot-buttons-box'>
+  <button onclick='submitForm()'>SUBMIT</button>
+  <button onclick='window.close()'>CLOSE</button>
+</div>
+</body>
+</html>

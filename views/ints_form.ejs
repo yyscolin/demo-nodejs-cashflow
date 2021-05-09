@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Exp11 Int Form</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src='/scripts/form.js'></script>
+<link href="/styles/main.css" rel="stylesheet" type="text/css" media="all">
+<link href="/styles/foot-buttons.css" rel="stylesheet" type="text/css" media="all">
+<link href="/styles/action-buttons.css" rel="stylesheet" type="text/css" media="all">
+<script>
+  function submitForm() {
+    let data = document.querySelectorAll(`select, input`)
+    let payload = {<%if(!isNew) {%>
+      id: <%=int.id%>,<%}%>
+      date: data[0].value,
+      sr_acc: data[1].value,
+      sr_amt: data[2].value,
+      de_acc: data[3].value,
+      de_amt: data[4].value ? data[4].value : data[2].value
+    }
+    payload.sendTo('/api/ints', '<%=isNew?'POST':'PUT'%>')
+  }
+</script>
+</head>
+<body>
+<h1>Ints Form</h1>
+<table>
+  <thead>
+    <tr>
+      <th colspan='2' style='text-align: center'><%=isNew?'Entry':'Alteration'%></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Date</td>
+      <td><input type='date'<%=int.date%>></td>
+    </tr>
+    <tr>
+      <td>Source</td>
+      <td>
+        <select><%accs.forEach(acc => {%>
+          <option value='<%=acc.id%>'<%=acc.sr%> ><%=acc.name%></option><%})%>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Amount</td>
+      <td><input type='number'<%=int.sr_amt%> ></td>
+    </tr>
+    <tr>
+      <td>Destination</td>
+      <td>
+        <select><%accs.forEach(acc => {%>
+          <option value='<%=acc.id%>'<%=acc.de%> ><%=acc.name%></option><%})%>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Amount</td>
+      <td><input type='number'<%=int.de_amt%> ></td>
+    </tr>
+  </tbody>
+</table>
+<p id='message-box' style='display: none'></p>
+<script>setSuccessMessage()</script>
+<div class='foot-buttons-box'>
+  <button onclick='submitForm()'>SUBMIT</button>
+  <button onclick='window.close()'>CLOSE</button>
+</div>
+</body>
+</html>

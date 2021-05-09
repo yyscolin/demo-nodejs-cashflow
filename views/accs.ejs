@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title></title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="/styles/main.css" rel="stylesheet">
+<link href="/styles/action-buttons.css" rel="stylesheet">
+<link href="/styles/foot-buttons.css" rel="stylesheet">
+<script src='/scripts/deleteDatabaseEntry.js'></script>
+</head>
+<body>
+<% include banner %>
+<div id='main-box'>
+  <h1>Kacoons Managie</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Kacoon</th>
+        <th style='text-align: center'>Tolecy</th>
+        <th style='text-align: center'>Actions</th>
+      </tr>
+    </thead>
+    <tbody><% accs.forEach(acc => {%>
+      <tr>
+        <td><%=acc.name%></td>
+        <td style='text-align: center'><%=acc.currency%></td>
+        <td style='text-align: center'>
+          <button class='action-button' onclick='window.open("/accs/form/<%=acc.id%>", "smartForm", "height=1080,width=1920")'>≡</button>
+          <button class='action-button' style='color: red' onclick='deleteDatabaseEntry(this, "exp11", "accs", <%=acc.id%>)'>✖</button>
+        </td>
+      </tr><%})%>
+    </tbody>
+  </table>
+  <div class='foot-buttons-box'>
+    <button onclick='window.open("/accs/form", "smartForm", "height=1080,width=1920")'>INSERT</button>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="/styles/main.css" rel="stylesheet">
+<link href="/styles/foot-buttons.css" rel="stylesheet">
+<script src='/scripts/form.js'></script>
+<script>
+  function submitForm() {
+    let payload = []
+    document.querySelectorAll('input').forEach(input => {
+      if (input.value)
+        payload.push({
+          acc: input.getAttribute('acc'),
+          date: '<%=date%>',
+          amt: input.value
+        })
+    })
+    payload.sendTo('/api/bals', 'PUT')
+  }
+</script>
+</head>
+<body>
+<h1>BALS <%=date%></h1>
+<table>
+  <tbody><%bals.forEach(bal => {%>
+    <tr>
+      <td><%=bal.name%></td>
+      <td>
+        <input acc='<%=bal.acc%>' type='number' value='<%=bal.amt%>'>
+      </td>
+    </tr><%})%>
+  </tbody>
+</table>
+<p id='message-box' style='display: none'></p>
+<div class='foot-buttons-box'>
+  <button onclick='submitForm()'>SUBMIT</button>
+  <button onclick='window.close()'>CLOSE</button>
+</div>
+</body>
+</html>

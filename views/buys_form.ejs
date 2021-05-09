@@ -1,0 +1,219 @@
+<%
+var isMultipays = !isNew
+    && (buy.pays.length > 1
+    || buy.amt != buy.pays[0].amt * -1
+    || buy.date != buy.pays[0].date)
+  ? true
+  : false
+%><!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Exp11 - Buys Form</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="/styles/main.css" rel="stylesheet" type="text/css">
+<link href="/styles/foot-buttons.css" rel="stylesheet" type="text/css">
+<link href="/styles/action-buttons.css" rel="stylesheet" type="text/css">
+<link href="/styles/smart-input.css" rel="stylesheet" type="text/css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src='/scripts/form.js'></script>
+<script>
+  function addRow() {
+    let paysForm = document.getElementById('pays-form')
+    let isFirstRow = paysForm.children.length < 1 ? true : false
+    let date = isFirstRow ? ` value="${document.getElementById('buy-date').value}"` : ''
+    let amt = isFirstRow ? ` value="-${document.getElementById('buy-amt').value}"` : ''
+    let row = document.createElement('tr')
+    row.innerHTML = `
+      <td style="width:120px"><input type="date"${date} style='color:green'></td>
+      <td style="width:120px">
+        <select style='color:green'><%
+        for (let acc of accs) {
+          let isCashWallet1 = acc.id == 1
+          let selected = isCashWallet1 ? ' selected' : ''%>
+          <option value="<%=acc.id%>"<%=selected%>><%=acc.name%></option><%}%>
+        </select>
+      </td>
+      <td style="width:120px"><input type="number"${amt} style='color:green'></td>
+      <td style="text-align:center">
+        <button class="action-button" title="Delete" style="color: red" onclick="deleteRow(this)">✖</button>
+      </td>`
+    paysForm.appendChild(row)
+  }
+
+  function deleteRow(button) {
+    if(confirm('Are you sure?')) {
+      let form = document.getElementById('pays-form')
+      let row = button.parentNode.parentNode
+      form.removeChild(row)
+      let id = row.getAttribute('no')
+      if (id) {
+        let payload = { database: 'exp11', table: 'pays', id }
+        payload.sendTo('/', 'DELETE')
+      }
+    }
+  }
+
+  var isMultipays = <%=isMultipays%>
+  function changeToMultiPaysForm() {
+    document.getElementById('pays-header-box').style.display = isMultipays ? 'none' : ''
+    document.getElementById('pays-form-box').style.display = isMultipays ? 'none' : ''
+    document.getElementById('pays-form-acc-row').style.display = isMultipays ? '' : 'none'
+    document.getElementById('toggle-pays-type-button').innerHTML = isMultipays ? 'MULTIPAYS' : 'REGPAYS'
+    isMultipays = isMultipays ? false : true
+    if (isMultipays) {
+      let pays = document.querySelectorAll('#pays-form>tr')
+      if (!pays.length) addRow()
+    }
+  }
+
+  function submitForm() {
+    var inputs = document.querySelectorAll('#buy-form input, #buy-form textarea, #buy-form select')
+    let payload = {<%if(!isNew) {%>
+      id: <%=buy.id%>,<%}%>
+      date: inputs[0].value,
+      itm: inputs[1].value,
+      cur: inputs[3].value,
+      amt: inputs[4].value,
+      ent: inputs[5].value,
+      remarks: inputs[6].value,
+      pays: []
+    }
+    if (isMultipays)
+      document.querySelectorAll('#pays-form>tr').forEach(row => {
+        var inputs = row.querySelectorAll('input, select')
+        payload.pays.push({
+          id: row.getAttribute('no'),
+          date: inputs[0].value,
+          acc: inputs[1].value,
+          amt: inputs[2].value
+        })
+      })
+    else {
+      if (inputs[2].value) {
+        let row = document.querySelector('#pays-form>tr')
+        let id = row ? row.getAttribute('no') : null
+        payload.pays.push({
+          id,
+          date: inputs[0].value,
+          acc: inputs[2].value,
+          amt: inputs[4].value*-1
+        })
+      }
+    }
+    payload.sendTo(`/api/buys`, `<%=isNew?'POST':'PUT'%>`)
+  }
+</script>
+<style>
+  #buy-form tr:last-child>td { /*remarks box*/
+    border: 0;
+    padding: 0;
+  }
+  textarea {
+    border: 0;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    margin-top: 4px;
+    padding: 0;
+    resize: none;
+    width: 100%;
+  }
+</style>
+</head>
+<body>
+<div id='main-box'>
+  <h1>BUYS FORM</h1>
+  <table>
+    <thead>
+      <tr>
+        <th colspan='2' style='text-align: center'><%=isNew?'Entry':'Alteration'%></th>
+      </tr>
+    </thead>
+    <tbody id='buy-form'>
+      <tr>
+        <td>Date</td>
+        <td><input id='buy-date' type='date' value='<%=buy.date%>'></td>
+      </tr>
+      <tr>
+        <td>Item</td>
+        <td>
+          <input class='smart-input' type='text' value='<%=buy.itm%>'>
+          <div class='smart-list'><%itms.forEach(itm => {%>
+            <p value='<%=itm.id%>' syns='<%=itm.syns%>' class='<%=itm.class%>'><%=itm.name%></p><%})%>
+          </div>
+        </td>
+      </tr>
+      <tr id='pays-form-acc-row' style='display:<%=buy.pays&&buy.pays.length>1?"none":""%>'>
+        <td>Account</td>
+        <td>
+          <select id='buy-acc'>
+            <option></option><%accs.forEach(acc => {
+            let selected = (isNew&&acc.id==1)||(buy.pays[0]&&acc.id==buy.pays[0].acc) ? ' selected' : ''%>
+            <option value='<%=acc.id%>'<%=selected%> ><%=acc.name%></option><%})%>
+          </selec>
+        </td>
+      </tr>
+      <tr>
+        <td>Currency</td>
+        <td><input id='buy-cur' maxlength='3' type='text' value='<%=buy.cur%>'></td>
+      </tr>
+      <tr>
+        <td>Amount</td>
+        <td><input id='buy-amt' type='number' value='<%=buy.amt%>'></td>
+      </tr>
+      <tr>
+        <td>Entity</td>
+        <td>
+          <input class='smart-input' type="text" value='<%=buy.ent%>'>
+          <div class='smart-list'><%ents.forEach(ent => {%>
+            <p value='<%=ent.id%>' syns='<%=ent.syns%>' class='<%=ent.class%>'><%=ent.name%></p><%})%>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan='2'>
+          <textarea placeholder='remarks'><%=buy.remarks%></textarea>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div id='pays-header-box' <%-isMultipays?``:`style='display:none'`%> >
+    <h1 style="display: inline-block">Pays</h1>
+    <button class='action-button' onclick='addRow()'>+</button>
+  </div>
+  <table id='pays-form-box' <%-isMultipays?``:`style='display:none'`%> >
+    <thead>
+      <tr>
+        <th style='width:128px'>Date</th>
+        <th style='width:128px'>Kacoon</th>
+        <th style='width:128px'>Amount</th>
+        <th>Action(s)</th>
+      </tr>
+    </thead>
+    <tbody id='pays-form'><%buy.pays.forEach(pay => {%>
+      <tr no='<%=pay.id%>'>
+        <td style='width:120px'><input type='date' value='<%=pay.date%>'></td>
+        <td style='width:120px'>
+          <select><%accs.forEach(acc => {
+            let selected = acc.id == pay.acc ? ' selected' : ''%>
+            <option value='<%=acc.id%>'<%=selected%> ><%=acc.name%></option><%})%>
+          </select>
+        </td>
+        <td style='width:120px'><input type='number' value='<%=pay.amt%>'></td>
+        <td style='text-align:center'>
+          <button class='action-button' title='Delete' style='color:red' onclick='deleteRow(this)'>✖</button>
+        </td>
+      </tr><%})%>
+    </tbody>
+  </table>
+</div>
+<p id='message-box' style='display: none'></p>
+<script>setSuccessMessage()</script>
+<div class='foot-buttons-box'>
+  <button id='toggle-pays-type-button' onclick='changeToMultiPaysForm()'><%=isMultipays?'REGPAYS':'MULTIPAYS'%></button>
+  <button onclick='submitForm()'>SUBMIT</button>
+  <button onclick='window.close()'>CLOSE</button>
+</div>
+<script src='/scripts/smartInput.js'></script>
+</body>
+</html>

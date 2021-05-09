@@ -1,0 +1,132 @@
+<%
+switch (table) {
+  case 'ents':
+    var header = 'Entity Form'
+    var title = `Exp11 - ${header}`
+    break
+  case 'itms':
+    var header = 'Buy Category Form'
+    var title = `Exp11 - ${header}`
+    break
+  case 'tfts':
+    var header = 'Transfer Trade Form'
+    var title = `Exp11 - ${header}`
+}
+%><!DOCTYPE html>
+<html lang="en">
+<head>
+<title><%=title%></title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src='/scripts/form.js'></script>
+<link href="/styles/main.css" rel="stylesheet" type="text/css" media="all">
+<link href="/styles/foot-buttons.css" rel="stylesheet" type="text/css" media="all">
+<link href="/styles/action-buttons.css" rel="stylesheet" type="text/css" media="all">
+<script>
+  function insertRow() {
+    let syn = document.createElement('input')
+    syn.style.color = 'green'
+    syns.append(syn)
+    synsBtns.innerHTML += `<button class='action-button' style='color:red' title='Remove Row' onclick='deleteRow(this)'>✖</button>`
+  }
+
+  function deleteRow(button) {
+    if (confirm('Are you sure?')) {
+      let buttons = synsBtns.children
+      let synonyms = syns.children
+      for (let i = 0; i < buttons.length; i++) {
+        if (buttons[i] == button) {
+          let synonym = synonyms[i]
+          let id = synonym.getAttribute('no')
+          if (id) {
+            let payload = { database: 'exp11', table: '<%=table%>_syns', id }
+            payload.sendTo('/', 'DELETE')
+          }
+          syns.removeChild(synonym)
+          synsBtns.removeChild(button)
+          break
+        }
+      }
+    }
+  }
+
+  function submitForm() {
+    let payload = {<%if(!isNew) {%>
+      id: <%=obj.id%>,<%}%>
+      name: objName.value,<%if(table=='itms'){%>
+      subname: objSubname.value,
+      cat: objCat.value,<%}%>
+      syns: []
+    }
+
+    syns.querySelectorAll('input').forEach(input => {
+      let id = input.getAttribute('no')
+      payload.syns.push({
+        id: id ? parseInt(id) : null,
+        name: input.value
+      })
+    })
+    
+    payload.sendTo(`/api/<%=table%>`, `<%=isNew?'POST':'PUT'%>`)
+  }
+</script>
+<style>
+  #syns>input {
+    display: block;
+  }
+  #synsBtns>.action-button {
+    display: block;
+    margin: auto;
+  }
+</style>
+</head>
+<body>
+<h1><%=header%></h1>
+<table>
+  <thead>
+    <tr style='text-align: center'>
+      <th></th>
+      <th>Name</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Item</td>
+      <td><input id='objName' type='text' value='<%=obj.name%>'></td>
+      <td style='text-align: center'><button class='action-button' style='color: green' title='Insert Synonym' onclick='insertRow()'>+</button></td>
+    </tr><%if(table=='itms'){%>
+    <tr>
+      <td>Subname</td>
+      <td><input id='objSubname' type='text' value='<%=obj.subname%>'></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Parent</td>
+      <td>
+        <select id='objCat'>
+          <option></option><%cats.forEach(cat => {%>
+          <option value='<%=cat.id%>' <%=cat.selected%> ><%=cat.name%></option><%})%>
+        </select>
+      </td>
+      <td></td>
+    </tr><%}%>
+    <tr>
+      <td>Synonyms</td>
+      <td id='syns'><%obj.syns.forEach(syn => {%>
+        <input no='<%=syn.id%>' type='text' value='<%=syn.name%>'><%})%>
+      </td>
+      <td id='synsBtns'><%obj.syns.forEach(syn => {%>
+        <button class='action-button' style='color: red' title='Remove Row' onclick='deleteRow(this)'>✖</button><%})%>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p id='message-box' style='display: none'></p>
+<script>setSuccessMessage()</script>
+<div class='foot-buttons-box'>
+  <button onclick='submitForm()'>SUBMIT</button>
+  <button onclick='window.close()'>CLOSE</button>
+</div>
+</body>
+</html>

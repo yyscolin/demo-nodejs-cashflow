@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Exp11 - DAS</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="/styles/main.css" rel="stylesheet">
+</head>
+<body>
+<% include banner %>
+<div id='main-box'
+  ><h1>DAS</h1
+  ><table
+    ><thead
+      ><tr
+        ><th></th
+        ><th>Pilaro</th
+        ><th>F&B</th
+        ><th>Terapo Pobiki</th
+      ></tr
+    ></thead
+    ><tbody <% for (let i = 0; i < exps.length; i++) {%>
+      ><tr
+        ><td><%=i+1%></td
+        ><td><%=exps[i].period%></td
+        ><td><%=exps[i]['F&B']%></td
+        ><td><%=exps[i]['public_transport']%></td
+      ></tr <%}%>
+    ></tbody
+  ></table
+></div
+></body>
+</html>

@@ -1,0 +1,26 @@
+.smart-list {
+  border: 1px solid black;
+  display: none;
+  position: absolute;
+  cursor: pointer;
+  max-height: 240px;
+  background-color: rgba(255, 255, 255, 1);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.smart-option {
+  color: black;
+  display: none;
+  height: 18px;
+  margin: 0;
+  padding: 1px 1vw;
+  width: 100%;
+  text-align: left;
+}
+.smart-option.selected {
+  display: block;
+}
+#smart-highlighted{
+  background-color: black;
+  color: white;
+}

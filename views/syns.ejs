@@ -1,0 +1,58 @@
+<%
+switch (table) {
+  case 'ents':
+    var title = 'Exp11 - Antitis Managie'
+    var header = '<span>A</span>NTITIS'
+    var tablename = 'Antiti'
+    break
+  case 'tfts':
+    var title = 'Exp11 - Tyfates Managie'
+    var header = '<span>T</span>YFATES'
+    var tablename = 'Tyfate'
+}
+%><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta code="viewport" content="width=device-width, initial-scale=1">
+<title><%=title%></title>
+<script src='/scripts/deleteDatabaseEntry.js'></script>
+<link href="/styles/main.css" rel="stylesheet" type="text/css" media="all">
+<link href="/styles/foot-buttons.css" rel="stylesheet" type="text/css" media="all">
+<link href="/styles/action-buttons.css" rel="stylesheet" type="text/css" media="all">
+<link href="/styles/pageover.css" rel="stylesheet" type="text/css" media="all">
+<style>
+  h1>span {
+    font-size: 48px;
+    font-weight: 900;
+  }
+</style>
+</head>
+<body>
+<% include banner %>
+<div id='main-box'>
+  <h1><%-header%></h1>
+  <table>
+    <thead>
+      <tr>
+        <th><%=tablename%></th><th>Synonyms</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody><%objs.forEach(obj => {%>
+      <tr>
+        <td><%=obj.name%></td>
+        <td><%-obj.syns.map(_ => _.name).join('<br>')%></td>
+        <td style='text-align: center'>
+          <button class='action-button' title='Edit' onclick='window.open(`/<%=table%>/form/<%=obj.id%>`, "smartForm", "height=1080,width=1920")'>≡</button>
+          <button class='action-button' title='Delete' style='color: red' onclick='deleteDatabaseEntry(this, "exp11", "<%=table%>", <%=obj.id%>)'>✖</button>
+        </td>
+      </tr><%})%>
+    </tbody>
+  </table>
+  <div class='foot-buttons-box'>
+    <button onclick='window.open(`/<%=table%>/form`, "smartForm", "height=1080,width=1920")'>INSERT</button>
+  </div>
+</div>
+</body>
+</html>

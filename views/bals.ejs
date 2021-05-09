@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Exp11 - Buys</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="/styles/main.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<% include banner %>
+<div id='main-box'>
+  <h1>Balances</h1>
+  <table>
+    <thead>
+      <th>Kacoon</th>
+      <th>Amount</th>
+    </thead>
+    <tbody><%for (let bal of bals) {%>
+      <tr>
+        <td><%=bal.name%></td>
+        <td><%=bal.amt%></td>
+      </tr><%}%>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>

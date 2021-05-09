@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Exp11 - Buys</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="/styles/main.css" rel="stylesheet" type="text/css" media="all">
+<link href="/styles/action-buttons.css" rel="stylesheet" type="text/css" media="all">
+<link href="/styles/foot-buttons.css" rel="stylesheet" type="text/css" media="all">
+<script src='/scripts/deleteDatabaseEntry.js'></script>
+<style>
+  td>p {
+    display: inline-block;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    margin: 0;
+    width: inherit;
+  }
+</style>
+</head>
+<body>
+<% include banner %>
+<div id='filtersBox' style='display:none;position:fixed;width:100vw;height:100vh;top:0;background-color:rgba(0,0,0,0.7);'>
+  <table style='display:block;margin:28vh auto;width:max-content'>
+    <thead>
+      <tr>
+        <th colspan='2' style='text-align:center;position:relative'>
+          <span>FILTERS</span>
+          <button class='action-button' style='position:absolute;top:0;right:2px' onclick='filtersBox.style.display="none"'>✖</button>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>fomato</td>
+        <td><input type='date' name='d1' value='<%=d1%>'></td>
+      </tr>
+      <tr>
+        <td>todalo</td>
+        <td><input type='date' name='d2' value='<%=d2%>'></td>
+      </tr><%for (let [table, objs] of Object.entries(objss)) {%>
+      <tr>
+        <td><%=table%></td>
+        <td class='smart-filter'>
+          <input smart-class='<%=table%>' class='smart-filter-display' type='text' value='<%=objs.displayValue%>' smart-value='<%=objs.smartValue%>'>
+          <div smart-class='<%=table%>' class='smart-filter-box' style='display:none;position:absolute;background-color:#2E64DE;padding:8px;margin-left:-8px;border:1px solid white'>
+            <button class='action-button' style='position:absolute;right:-12px;top:-12px'>✖</button>
+            <input smart-class='<%=table%>' class='smart-filter-input' type='text' placeholder='Look for...'>
+            <button smart-class='<%=table%>' style='display:block;width:100%'>RESET</button>
+            <div smart-class='<%=table%>' class='smart-filter-list' style='max-height:300px;overflow-y:scroll;margin:0;'><%objs.forEach(obj => {%>
+              <div smart-class='<%=table%>' class='smart-filter-option' value='<%=obj.id%>' syns='<%=obj.syns%>' style='cursor:default;margin:0;width:100%'>
+                <input id='smart-filter-checkbox-<%=table%>-<%=obj.id%>' smart-class='<%=table%>' class='smart-filter-checkbox' type='checkbox' <%=obj.isChecked?'checked':''%>
+                ><label for='smart-filter-checkbox-<%=table%>-<%=obj.id%>' smart-class='<%=table%>'><%=obj.name%></label>
+              </div><%})%>
+            </div>
+          </div>
+        </td>
+      </tr><%}%>
+      <tr>
+        <td>Currency</td>
+        <td>
+          <select><%currencies.forEach(cur => {%>
+            <option <%=cur.isSelected%> ><%=cur.currency%></option><%})%>
+          </select>
+        </td>
+      </tr>
+      <script>
+        document.querySelectorAll('.smart-filter-display').forEach(_ => {
+          _.onfocus = function() {
+            let box = this.parentNode.querySelector('.smart-filter-box')
+            box.style.display = 'block'
+            let input = box.querySelector('input').focus()
+          }
+        })
+        document.querySelectorAll('.smart-filter-input').forEach(_ => {
+          _.oninput = function() {
+            let list = this.parentNode.querySelector('.smart-filter-list')
+            let options = list.children
+            let regex = new RegExp(`${this.value}`, 'i')
+            for (let i = 0; i < options.length; i++) {
+              let option = options[i]
+              let syns = option.getAttribute('syns')
+              option.style.display = regex.test(syns) ? 'block' : 'none'
+            }
+          }
+          _.onblur = function(event) {
+            let target = event.relatedTarget
+            if (!target) target = event.explicitOriginalTarget
+            if (target.nodeType == 3) target = target.parentNode
+            if (target.getAttribute('smart-class') != this.getAttribute('smart-class')) {
+              let box = this.parentNode
+              box.style.display = 'none'
+            }
+          }
+        })
+        document.querySelectorAll('.smart-filter-box button').forEach(_ => {
+          _.onclick = function() {
+            let box = this.parentNode
+            let display = box.previousElementSibling
+            display.value = ''
+            display.setAttribute('smart-value', '')
+            let input = this.previousElementSibling
+            input.value = ''
+            let list = box.querySelector('.smart-filter-list')
+            let options = list.querySelectorAll('.smart-filter-option')
+            options.forEach(option => {
+              option.style.display = ''
+              option.querySelector('input').checked = false
+            })
+          }
+        })
+        document.querySelectorAll('.smart-filter-checkbox').forEach(_ => {
+          _.onclick = function() {
+            let option = this.parentNode
+            let list = option.parentNode
+            let box = list.parentNode
+            let display = box.previousElementSibling
+            let options = list.children
+
+            let smartValue = ''
+            let selected = list.querySelectorAll('.smart-filter-checkbox:checked')
+            selected.forEach(_ => {
+              if (smartValue) smartValue += ','
+              smartValue += _.parentNode.getAttribute('value')
+            })
+            display.setAttribute('smart-value', smartValue)
+
+            if (selected.length) {
+              if (this.checked)
+                display.value = option.querySelector('label').innerText
+              else {
+                let x = Math.floor(Math.random() * (selected.length))
+                display.value = selected[x].parentNode.querySelector('label').innerText
+              }
+              if (selected.length > 1) display.value += ` (+${selected.length - 1} more)`
+            } else
+              display.value = ''
+          }
+        })
+        document.querySelectorAll('.smart-filter-box').forEach(_ => {
+          _.onclick = function() {
+            let input = this.querySelector('input')
+            input.focus()
+          }
+        })
+      </script>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan='2' style='border:none;text-align:center'>
+          <button onclick='getAllTime()'>ALTIMO</button>
+          <button onclick='clearFilters()'>KLRATI</button>
+          <button onclick='submitForm()'>SUMIRE</button>
+        </td>
+      </tr>
+      <script>
+        function getAllTime() {
+          let filters = document.querySelectorAll('td>input')
+          filters[0].value = '2018-11-04'
+          filters[1].value = new Date().toLocaleDateString('fr-CA')
+        }
+
+        function clearFilters() {
+          let filters = document.querySelectorAll('td>input')
+          for (let i = 0; i <= 4; i++) {
+            filters[i].value = ''
+            if (i > 1) filters[i].setAttribute('smart-value', '')
+          }
+        }
+
+        function submitForm() {
+          let filters = document.querySelectorAll('td>input, td>select')
+          let d1 = filters[0].value
+          let d2 = filters[1].value
+          let itms = filters[2].getAttribute('smart-value')
+          let ents = filters[3].getAttribute('smart-value')
+          let cur = filters[4].value
+
+          let queries = []
+          if (d1) queries.push(`d1=${d1}`)
+          if (d2) queries.push(`d2=${d2}`)
+          if (itms) queries.push(`itms=${itms}`)
+          if (ents) queries.push(`ents=${ents}`)
+          if (cur) queries.push(`cur=${cur}`)
+
+          window.location.replace(`/buys?${queries.join('&')}`)
+        }
+      </script>
+    </tfoot>
+  </table>
+</div>
+<div id='main-box'>
+  <h1>Buys</h1><%if (buys.length) {%>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Item</th>
+        <th>Entity</th>
+        <th>Buy</th>
+        <th>Fay</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody><%buys.forEach(buy => {
+      if (buy.remarks) buy.itm += `${/ /.test(buy.remarks)?'<br>':' '}${buy.remarks}`%>
+      <tr rowId='<%=buy.id%>'>
+        <td style='width: 90px'><p><%=buy.date%></p></td>
+        <td style='width: 180px' title='<%=buy.remarks%>'><p><%-buy.itm%></p></td>
+        <td style='width: 180px'><p><%=buy.ent%></p></td>
+        <td style='width: 90px'><p><%=buy.buy%></p></td>
+        <td style='width: 90px'><p><%=buy.fay%></p></td>
+        <td style='text-align: center'>
+          <button class='action-button' title='Edit' onclick='window.open("/buys/form/<%=buy.id%>", "smartForm", "height=560,width=720")'>≡</button>
+          <button class='action-button' style='color:red' onclick='deleteDatabaseEntry(this, "exp11", "buys", <%=buy.id%>)'>✖</button>
+        </td>
+      </tr><%})%>
+      <tr>
+        <td colspan='3' style='text-align:right'>TOTAL</td>
+        <td><%=total.buys.toFixed(2)%></td>
+        <td><%=total.fays.toFixed(2)%></td>
+        <td style='text-align:center'><%=currencies.find(_ => _.isSelected).currency%></td>
+      </tr>
+    </tbody>
+  </table><%} else {%>
+  <p>There are no entries to show.</p><%}%>
+  <div class='foot-buttons-box'>
+    <button onclick='filtersBox.style.display="block"'>FILTERS</button
+    ><button onclick='window.open("/buys/form", "smartForm", "height=560,width=720")'>INSERT</button>
+  </div>
+</div>
+</body>
+</html>

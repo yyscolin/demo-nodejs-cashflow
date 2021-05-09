@@ -1,0 +1,95 @@
+<style>
+  body {
+    margin: 0;
+  }
+  #banner {
+    background-color: #2E64FE;
+    padding: 12px 0;
+    width: 100%;
+  }
+  #banner * {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+  }
+  #banner>h1 {
+    cursor: default;
+    max-width: 720px;
+    width: 100%;
+  }
+  #navbar {
+    margin: 0 30px;
+    position: absolute;
+    right: 0;
+    top: 56px
+  }
+  #navbar>div {
+    display: inline-block;
+    vertical-align: top;
+  }
+  #navbar>div.selected {
+    background-color: white;
+    color: #2E64FE;
+  }
+  #navbar h3, #navbar p {
+    margin: 0;
+    padding: 16px 24px;
+    width: 96px;
+  }
+  #navbar>div>h3 {
+    cursor: default;
+  }
+  #navbar>div>p {
+    background-color: #2E64FE;
+    color: white;
+    cursor: pointer;
+    display: none;
+  }
+  #navbar>div.selected>p {
+    display: block;
+  }
+  #navbar>div>p:hover {
+    background-color: black;
+  }
+</style>
+<div id='banner'>
+  <h1>$$$Book v11</h1>
+  <div id='navbar'>
+    <div>
+      <h3>Pages</h3>
+      <p onclick='window.location.href = "/buys"'>Buys</p>
+      <p onclick='window.location.href = "/bals"'>Balance</p>
+      <p onclick='window.location.href = "/wcfs"'>Wecafos</p>
+      <p onclick='window.location.href = "/das"'>Analysis</p>
+    </div>
+    <div>
+      <h3>Managie</h3>
+      <p onclick='window.location.href = "/accs"'>Kacoons</p>
+      <p onclick='window.location.href = "/ents"'>Antitis</p>
+      <p onclick='window.location.href = "/itms"'>Bykates</p>
+      <p onclick='window.location.href = "/tfts"'>Tyfates</p>
+    </div>
+  </div>
+  <script>
+    navbar.querySelectorAll('div').forEach(_ => {
+      _.onclick = function() {
+        let items = this.parentNode.querySelectorAll('div')
+        for (let i = 0; i < items.length; i++) {
+          if (items[i] == this && !items[i].classList.contains('selected'))
+            items[i].classList.add('selected')
+          else
+            items[i].classList.remove('selected')
+        }
+      }
+      _.onmouseover = function() {
+        this.classList.add('selected')
+      }
+      _.onmouseout = function() {
+        this.classList.remove('selected')
+      }
+    })
+  </script>
+</div>
