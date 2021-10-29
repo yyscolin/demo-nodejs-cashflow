@@ -123,11 +123,13 @@ app.listen(port, () => {
 
 /** USING HTTPS */
 var port2 = process.env.PORT_HTTPS
-const credentials = {
- key: fs.readFileSync(process.env.SSL_KEY, 'utf8'),
- cert: fs.readFileSync(process.env.SSL_CRT, 'utf8')
+if (port2) {
+  const credentials = {
+    key: fs.readFileSync(process.env.SSL_KEY, 'utf8'),
+    cert: fs.readFileSync(process.env.SSL_CRT, 'utf8')
+  }
+  const httpsServer = https.createServer(credentials, app)
+  httpsServer.listen(port2, () => {
+    console.log(`Listening on Port ${port2}`)
+  })
 }
-const httpsServer = https.createServer(credentials, app)
-httpsServer.listen(port2, () => {
- console.log(`Listening on Port ${port2}`)
-})
