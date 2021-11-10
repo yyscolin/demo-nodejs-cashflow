@@ -4,18 +4,13 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "babel-plugin-idx": "^2.4.0",
     "body-parser": "^1.18.3",
     "dotenv": "^6.2.0",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "https": "^1.0.0",
-    "idx": "^2.5.6",
-    "jsdom": "^15.1.1",
     "mysql": "^2.16.0",
-    "node-fetch": "^2.6.0",
-    "selenium-webdriver": "^4.0.0-alpha.5",
     "uuid": "^3.3.2"
   },
   "devDependencies": {},
