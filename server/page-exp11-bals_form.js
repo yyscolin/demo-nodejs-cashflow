@@ -7,9 +7,9 @@ module.exports = async function(req, res) {
     let date = new Date(dday + (req.params.week*7-1)*24*60*60*1000).toLocaleDateString('fr-CA')
     let bals = await mdb.postQuery(`
       select id as acc, name, ifnull(amt, '') as amt
-      from exp11.accs
+      from accs
       left join (
-        select acc, amt from exp11.bals where date = '${date}'
+        select acc, amt from bals where date = '${date}'
       ) t on accs.id = t.acc
       order by name
     `)

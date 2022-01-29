@@ -6,7 +6,7 @@ module.exports = async function(req, res) {
     let id = req.params.id
     if (id != undefined) {
       if (id != parseInt(id)) throw new Error('400::Page not found')
-      var dbResponse = await mdb.get(`select date_format(date, '%Y-%m-%d') as date, sr_acc, sr_amt, de_acc, de_amt from exp11.ints where id = ${id}`)
+      var dbResponse = await mdb.get(`select date_format(date, '%Y-%m-%d') as date, sr_acc, sr_amt, de_acc, de_amt from ints where id = ${id}`)
       if (!dbResponse) throw new Error('400::Page not found')
       var int = {
         id,
@@ -23,7 +23,7 @@ module.exports = async function(req, res) {
       }
       var isNew = true
     }
-    let accs = await mdb.postQuery(`select id, name from exp11.accs order by name`)
+    let accs = await mdb.postQuery(`select id, name from accs order by name`)
     accs.forEach(acc => {
       acc.sr = (isNew && acc.id==7) || (!isNew && acc.id==dbResponse.sr_acc) ? ` selected='selected'` : ''
       acc.de = (isNew && acc.id==4) || (!isNew && acc.id==dbResponse.de_acc) ? ` selected='selected'` : ''

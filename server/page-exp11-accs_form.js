@@ -6,7 +6,7 @@ module.exports = async function(req, res) {
     let id = req.params.id
     if (id != undefined) {
       if (id != parseInt(id)) throw new Error('400::Page not found')
-      var dbResponse = await mdb.get(`select name, currency from exp11.accs where id = ${id}`)
+      var dbResponse = await mdb.get(`select name, currency from accs where id = ${id}`)
       if (!dbResponse) throw new Error('400::Page not found')
       var acc = {
         id,

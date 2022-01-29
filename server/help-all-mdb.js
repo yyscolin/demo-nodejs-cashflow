@@ -4,7 +4,8 @@ const con = mysql.createConnection({
   host: process.env.MYSQL_HOST || 'localhost',
   user: process.env.MYSQL_USER,
   port: process.env.MYSQL_PORT || 3306,
-  password: process.env.MYSQL_PASS
+  password: process.env.MYSQL_PASS,
+  database: process.env.MYSQL_DATABASE,
 })
 
 con.connect(err => {

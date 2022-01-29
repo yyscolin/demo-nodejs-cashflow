@@ -14,7 +14,7 @@ module.exports = async function(req, res) {
 
     await con.postQuery('start transaction')
     var cat = req.body.cat ? req.body.cat : null
-    var query = `insert into exp11.itms (id, name, subname, cat) values (${id}, "${name}", "${subname}", ${cat})
+    var query = `insert into itms (id, name, subname, cat) values (${id}, "${name}", "${subname}", ${cat})
       on duplicate key update name=values(name), subname=values(subname), cat=values(cat)`
     var dbResponse = await con.postQuery(query)
     if (!id) var id = dbResponse.insertId
@@ -22,7 +22,7 @@ module.exports = async function(req, res) {
     var syns = req.body.syns
     if (syns.length) {
       syns = syns.map(_ => `(${_.id}, ${id}, "${_.name}")`)
-      var query = `insert into exp11.itms_syns (id, of, name) values ${syns.toString()}
+      var query = `insert into itms_syns (id, of, name) values ${syns.toString()}
         on duplicate key update of=values(of), name=values(name)`
       await con.postQuery(query)
     }

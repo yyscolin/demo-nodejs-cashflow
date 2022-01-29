@@ -35,10 +35,10 @@ module.exports = async function(req, res) {
 
     let itms = await mdb.select(`
       select itms.id, name, cat as supercat, ifnull(subname, name) as subname, syns
-      from exp11.itms
+      from itms
       left join (
         select of, group_concat(name separator "<span>, </span>") as syns
-        from exp11.itms_syns
+        from itms_syns
         group by of
       ) t1 on itms.id = t1.of
     `)

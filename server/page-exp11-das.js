@@ -7,8 +7,8 @@ module.exports = async function(req, res) {
     let cutoffDate = new Date(today.getTime() - (today.getDay()+7*16+1)*24*60*60*1000) //Saturday from 16 weeks ago
     let cutoffString = cutoffDate.toLocaleDateString('fr-CA')
 
-    let buys = await mdb.postQuery(`select date_format(date, "%Y-%m-%d") as date, itm, amt from exp11.buys where itm = 1 and date >= "${cutoffString}"`)
-    let ezlink_ints = await mdb.postQuery('select date, de_amt as amt from exp11.ints where de_acc in (3,4)')
+    let buys = await mdb.postQuery(`select date_format(date, "%Y-%m-%d") as date, itm, amt from buys where itm = 1 and date >= "${cutoffString}"`)
+    let ezlink_ints = await mdb.postQuery('select date, de_amt as amt from ints where de_acc in (3,4)')
 
     let t1 = `select "${cutoffString}" as date`
     for (let i = 1; i <= 16; i++) {
@@ -16,7 +16,7 @@ module.exports = async function(req, res) {
     }
     let t2 = `(
       select date, sum(amt) as amt
-      from exp11.bals
+      from bals
       where acc in (3,4)
       group by date
     ) t2`

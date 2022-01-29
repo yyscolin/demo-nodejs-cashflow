@@ -4,10 +4,10 @@ const handleError = require('./help-all-handleError.js')
 async function getSyns(table, checkedIds) {
   return await mdb.postQuery(`
     select t1.id, name, syns, ${checkedIds ? `if(t1.id in (${checkedIds}), true, false)` : 'true'} as isChecked
-    from exp11.${table} t1
+    from ${table} t1
     join (
       select id, group_concat(syn separator "::") as syns from (
-        select id, name as syn from exp11.${table} union select ${table}.id, ${table}_syns.name from exp11.${table} join exp11.${table}_syns on ${table}.id = ${table}_syns.of
+        select id, name as syn from ${table} union select ${table}.id, ${table}_syns.name from ${table} join ${table}_syns on ${table}.id = ${table}_syns.of
       ) tt1 group by id
     ) t2 on t1.id = t2.id order by name
   `)
@@ -47,14 +47,14 @@ module.exports = async function(req, res) {
       select buys.id, date_format(date, '%Y-%m-%d') as date,
         itms.name as itm, ents.name as ent, buys.amt as buy,
         remarks, (buys.amt + ifnull(pays.amt, 0)) as fay
-      from exp11.buys
+      from buys
       left join (
         select buy, sum(amt) as amt
-        from exp11.pays
+        from pays
         group by buy
       ) pays on buys.id=pays.buy
-      left join exp11.itms on buys.itm=itms.id
-      left join exp11.ents on buys.ent=ents.id
+      left join itms on buys.itm=itms.id
+      left join ents on buys.ent=ents.id
       where ${queryFilters}
       order by date
     `)
@@ -78,7 +78,7 @@ module.exports = async function(req, res) {
     })
     var query = `select distinct currency,
       if(currency="${req.query.cur}", "selected", "") as isSelected
-      from exp11.accs`
+      from accs`
     let currencies = await mdb.postQuery(query)
     for (let [table, objs] of Object.entries(objss)) {
       let smartValues = []

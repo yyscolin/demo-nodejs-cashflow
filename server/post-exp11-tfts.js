@@ -10,14 +10,14 @@ module.exports = async function(req, res) {
     validateName(name)
 
     await con.postQuery('start transaction')
-    var query = `insert into exp11.tfts (id, name) values (${id}, "${name}") on duplicate key update name=values(name)`
+    var query = `insert into tfts (id, name) values (${id}, "${name}") on duplicate key update name=values(name)`
     var dbResponse = await con.postQuery(query)
     if (!id) var id = dbResponse.insertId
 
     var syns = req.body.syns
     if (syns.length) {
       syns = syns.map(_ => `(${_.id}, ${id}, "${_.name}")`)
-      var query = `insert into exp11.tfts_syns (id, of, name) values ${syns.toString()}
+      var query = `insert into tfts_syns (id, of, name) values ${syns.toString()}
         on duplicate key update of=values(of), name=values(name)`
       await con.postQuery(query)
     }

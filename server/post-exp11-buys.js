@@ -42,7 +42,7 @@ module.exports = async function(req, res) {
 
     await mdb.postQuery('start transaction')
     var dbResponse = await mdb.postQuery(`
-      insert into exp11.buys (id, date, itm, cur, amt, ent, remarks) values (${id}, "${date}", ${itm}, "${cur}", ${amt}, ${ent}, ${remarks})
+      insert into buys (id, date, itm, cur, amt, ent, remarks) values (${id}, "${date}", ${itm}, "${cur}", ${amt}, ${ent}, ${remarks})
       on duplicate key update date=values(date), itm=values(itm), amt=values(amt), ent=values(ent), remarks=values(remarks)
     `)
 
@@ -56,7 +56,7 @@ module.exports = async function(req, res) {
         pays.push(`(${pay.id}, ${id}, "${pay.date}", ${pay.acc}, ${pay.amt})`)
       })
       await mdb.postQuery(`
-        insert into exp11.pays (id, buy, date, acc, amt) values ${pays.toString()}
+        insert into pays (id, buy, date, acc, amt) values ${pays.toString()}
         on duplicate key update date=values(date), acc=values(acc), amt=values(amt)
       `)
     }

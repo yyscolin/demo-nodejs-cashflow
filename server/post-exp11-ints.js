@@ -19,7 +19,7 @@ module.exports = async function(req, res) {
     validateAmount(sr_amt)
     validateAmount(de_amt)
 
-    var query = `insert into exp11.ints (id, date, sr_acc, sr_amt, de_acc, de_amt) values (${id}, "${date}", ${sr_acc}, ${sr_amt}, ${de_acc}, ${de_amt})
+    var query = `insert into ints (id, date, sr_acc, sr_amt, de_acc, de_amt) values (${id}, "${date}", ${sr_acc}, ${sr_amt}, ${de_acc}, ${de_amt})
       on duplicate key update date=values(date), sr_acc=values(sr_acc), sr_amt=values(sr_amt), de_acc=values(de_acc), de_amt=values(de_amt)`
     await con.postQuery(query)
     

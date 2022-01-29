@@ -38,54 +38,54 @@ module.exports = async function(req, res) {
         if(name like 'ez-link%', 0, round(start-balance+ifnull(pays,0)+ifnull(ints,0)+ifnull(exts,0), 2)) as error
       from (
         select acc, amt as start
-        from exp11.bals
+        from bals
         where (date, acc) in (
           select max(date), acc
           from (
-            select date, acc from exp11.bals
+            select date, acc from bals
             where date < '${payload.dats[0]}'
           ) t group by acc
         )
       ) start right join (
-        select acc, amt as balance from exp11.bals where id in (select max(id) from exp11.bals where date>='${payload.dats[0]}' and date<='${payload.dats[1]}' group by acc)`
+        select acc, amt as balance from bals where id in (select max(id) from bals where date>='${payload.dats[0]}' and date<='${payload.dats[1]}' group by acc)`
         // select acc, amt as balance
-        // from exp11.bals
+        // from bals
         // where (date, acc) in (
         //   select max(date), acc
         //   from (
         //     select date, acc
-        //     from exp11.bals
+        //     from bals
         //     where date <= '${payload.dats[1]}'
         //   ) t group by acc
         // )
       +`) balance using (acc) left join (
         select acc, sum(amt) as pays
-        from exp11.pays
+        from pays
         where date >= '${payload.dats[0]}' and date <= '${payload.dats[1]}'
         group by acc
       ) pays using (acc) left join (
         select acc, sum(amt) as ints
         from (
           select sr_acc as acc, sr_amt*-1 as amt
-          from exp11.ints
+          from ints
           where date >= '${payload.dats[0]}' and date <= '${payload.dats[1]}'
           union all
           select de_acc as acc, de_amt as amt
-          from exp11.ints
+          from ints
           where date >= '${payload.dats[0]}' and date <= '${payload.dats[1]}'
         ) t group by acc
       ) ints using (acc) left join (
         select acc, sum(amt) as exts
-        from exp11.exts
+        from exts
         where date >= '${payload.dats[0]}' and date <= '${payload.dats[1]}'
         group by acc
       ) exts using (acc) join
-      exp11.accs on acc = accs.id
+      accs on acc = accs.id
       order by acc
     `)
-    payload.ints = await mdb.postQuery(`select ints.id, date_format(date, '%Y-%m-%d') as date, t1.name as sr, t2.name as de, sr_amt, de_amt from exp11.ints join exp11.accs t1 on ints.sr_acc = t1.id join exp11.accs t2 on ints.de_acc = t2.id where date >= '${payload.dats[0]}' and date <= '${payload.dats[1]}'`)
-    payload.pays = await mdb.postQuery(`select pays.id, buy, date_format(pays.date, '%Y-%m-%d') as date, itms.name as itm, accs.name as acc, pays.amt, ents.name as ent, remarks from exp11.pays join exp11.buys on pays.buy = buys.id join exp11.accs on pays.acc = accs.id join exp11.itms on buys.itm = itms.id left join exp11.ents on buys.ent = ents.id where pays.date >= '${payload.dats[0]}' and pays.date <= '${payload.dats[1]}' order by pays.date`)
-    payload.exts = await mdb.postQuery(`select exts.id, date_format(date, '%Y-%m-%d') as date, tfts.name as tft, accs.name as acc, amt, remarks is not null as remarks from exp11.exts left join exp11.tfts on exts.tft = tfts.id join exp11.accs on exts.acc = accs.id where date >= '${payload.dats[0]}' and date <= '${payload.dats[1]}' order by date`)
+    payload.ints = await mdb.postQuery(`select ints.id, date_format(date, '%Y-%m-%d') as date, t1.name as sr, t2.name as de, sr_amt, de_amt from ints join accs t1 on ints.sr_acc = t1.id join accs t2 on ints.de_acc = t2.id where date >= '${payload.dats[0]}' and date <= '${payload.dats[1]}'`)
+    payload.pays = await mdb.postQuery(`select pays.id, buy, date_format(pays.date, '%Y-%m-%d') as date, itms.name as itm, accs.name as acc, pays.amt, ents.name as ent, remarks from pays join buys on pays.buy = buys.id join accs on pays.acc = accs.id join itms on buys.itm = itms.id left join ents on buys.ent = ents.id where pays.date >= '${payload.dats[0]}' and pays.date <= '${payload.dats[1]}' order by pays.date`)
+    payload.exts = await mdb.postQuery(`select exts.id, date_format(date, '%Y-%m-%d') as date, tfts.name as tft, accs.name as acc, amt, remarks is not null as remarks from exts left join tfts on exts.tft = tfts.id join accs on exts.acc = accs.id where date >= '${payload.dats[0]}' and date <= '${payload.dats[1]}' order by date`)
     res.render('wcfs', payload)
   } catch(err) {
     handleError(res, err)

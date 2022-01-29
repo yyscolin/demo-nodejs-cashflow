@@ -12,7 +12,7 @@ module.exports = async function(req, res) {
     validateName(name)
     validateCurrency(currency)
 
-    var query = `insert into exp11.accs (id, name, currency) values (${id}, "${name}", "${currency.toUpperCase()}")
+    var query = `insert into accs (id, name, currency) values (${id}, "${name}", "${currency.toUpperCase()}")
       on duplicate key update name=values(name), currency=values(currency)`
     await mdb.postQuery(query)
     

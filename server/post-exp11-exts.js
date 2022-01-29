@@ -28,7 +28,7 @@ module.exports = async function(req, res) {
 
     tft = await getDatabaseIdByName('exp11', 'tfts', tft)
 
-    var query = `insert into exp11.exts (id, date, tft, acc, amt, remarks) values (${id}, "${date}", ${tft}, ${acc}, ${amt}, ${remarks})
+    var query = `insert into exts (id, date, tft, acc, amt, remarks) values (${id}, "${date}", ${tft}, ${acc}, ${amt}, ${remarks})
       on duplicate key update date=values(date), tft=values(tft), acc=values(acc), amt=values(amt), remarks=values(remarks)`
     await mdb.postQuery(query)
     
