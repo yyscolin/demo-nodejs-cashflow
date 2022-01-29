@@ -83,7 +83,7 @@ module.exports = async function(req, res) {
       accs on acc = accs.id
       order by acc
     `)
-    payload.ints = await mdb.postQuery(`select ints.id, date_format(date, '%Y-%m-%d') as date, t1.name as sr, t2.name as de, sr_amt, de_amt from ints join accs t1 on ints.sr_acc = t1.id join accs t2 on ints.de_acc = t2.id where date >= '${payload.dats[0]}' and date <= '${payload.dats[1]}'`)
+    payload.ints = await mdb.postQuery(`select ints.id, date_format(date, '%Y-%m-%d') as date, t1.name as sr, t2.name as de, sr_amt, de_amt from ints join accs t1 on ints.sr_acc = t1.id join accs t2 on ints.de_acc = t2.id where date >= '${payload.dats[0]}' and date <= '${payload.dats[1]}' order by date, sr, de, sr_amt, de_amt`)
     payload.pays = await mdb.postQuery(`select pays.id, buy, date_format(pays.date, '%Y-%m-%d') as date, itms.name as itm, accs.name as acc, pays.amt, ents.name as ent, remarks from pays join buys on pays.buy = buys.id join accs on pays.acc = accs.id join itms on buys.itm = itms.id left join ents on buys.ent = ents.id where pays.date >= '${payload.dats[0]}' and pays.date <= '${payload.dats[1]}' order by pays.date`)
     payload.exts = await mdb.postQuery(`select exts.id, date_format(date, '%Y-%m-%d') as date, tfts.name as tft, accs.name as acc, amt, remarks is not null as remarks from exts left join tfts on exts.tft = tfts.id join accs on exts.acc = accs.id where date >= '${payload.dats[0]}' and date <= '${payload.dats[1]}' order by date`)
     res.render('wcfs', payload)
