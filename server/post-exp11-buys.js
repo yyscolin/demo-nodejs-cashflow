@@ -25,26 +25,23 @@ module.exports = async function(req, res) {
     if (itm) {
       validateString(itm, 'Item')
       itm = await getDatabaseIdByName('exp11', 'itms', itm)
-    } else
-      itm = 'NULL'
+    }
 
     if (ent) {
       validateString(ent, 'Entitiy')
       ent = await getDatabaseIdByName('exp11', 'ents', ent)
-    } else
-      ent = 'NULL'
+    }
 
     if (remarks) {
       validateString(remarks, 'Remarks')
-      remarks = `"${remarks}"`
-    } else
-      remarks = 'NULL'
+      remarks = remarks
+    }
 
     await mdb.postQuery('start transaction')
     var dbResponse = await mdb.postQuery(`
-      insert into buys (id, date, itm, cur, amt, ent, remarks) values (${id}, "${date}", ${itm}, "${cur}", ${amt}, ${ent}, ${remarks})
+      insert into buys (id, date, itm, cur, amt, ent, remarks) values (?,?,?,?,?,?,?)
       on duplicate key update date=values(date), itm=values(itm), amt=values(amt), ent=values(ent), remarks=values(remarks)
-    `)
+    `, [id, date, itm, cur, amt, ent, remarks])
 
     if (req.body.pays.length) {
       if (!id) var id = dbResponse.insertId
@@ -53,12 +50,12 @@ module.exports = async function(req, res) {
         validateDate(pay.date)
         validateAccount(pay.acc)
         validateAmount(pay.amt)
-        pays.push(`(${pay.id}, ${id}, "${pay.date}", ${pay.acc}, ${pay.amt})`)
+        pays.push([pay.id, id, pay.date, pay.acc, pay.amt])
       })
       await mdb.postQuery(`
-        insert into pays (id, buy, date, acc, amt) values ${pays.toString()}
+        insert into pays (id, buy, date, acc, amt) values ?
         on duplicate key update date=values(date), acc=values(acc), amt=values(amt)
-      `)
+      `, [pays])
     }
     await mdb.postQuery('commit')
     res.send()
