@@ -16,7 +16,7 @@ module.exports = async function(req, res) {
         date: ` value=${dbResponse.date}`,
         tft: dbResponse.tft ? ` value=${dbResponse.tft}` : '',
         amt: ` value=${dbResponse.amt}`,
-        remarks: dbResponse.remarks ? ` value=${dbResponse.remarks}` : ''
+        remarks: dbResponse.remarks
       }
       var isNew = false
     } else {
