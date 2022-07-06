@@ -89,7 +89,7 @@ app.get('/exts/form/:id?', require('./server/page-exp11-exts_form'))
 app.get('/accs/form/:id?', require('./server/page-exp11-accs_form'))
 app.get('/accs', require('./server/page-exp11-accs'))
 app.get(/^\/(ents|tfts)\/?$/, require('./server/page-exp11-syns'))
-app.get('/itms', require('./server/page-exp11-syns'))
+app.get('/itms', require('./server/page-exp11-itms'))
 app.get(/^\/(ents|itms|tfts)\/form(|\/[0-9]{0,10})\/?$/, require('./server/page-exp11-syns_form'))
 
 app.get(/.*\.(css|jpg|js)$/, (req, res) => {

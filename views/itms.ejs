@@ -65,11 +65,15 @@
       }
     }
   }
-</script></div
-><div id='main-box'
-  >
+</script>
+</div>
+<div id='main-box'>
   <h1>Bykates</h1>
-  <%-catsMap%>
+  <table>
+    <tbody>
+      <%-categoriesHTML%>
+    </tbody>
+  </table>
   <script>
     document.querySelectorAll('td').forEach(td => {
       let actions = document.getElementById('actions-box')

@@ -3,49 +3,44 @@ const handleError = require('./help-all-handleError.js')
 
 module.exports = async function(req, res) {
   try {
-    function getCats(supercat) {
-      let cats = itms.filter(_ => _.supercat == supercat)
-      cats.map(cat => {
-        cat.subcats = getCats(cat.id)
-        if (cat.subcats.length) {
-          cat.rowspan = 0
-          cat.subcats.forEach(_ => cat.rowspan += _.rowspan)
-          cat.colspan = 1
+    function getCats(superCategory=null) {
+      const categoryFilter = category => category.superCategory == superCategory
+      const levelCategories = purchaseCategories.filter(categoryFilter)
+      return levelCategories.map(category => {
+        category.subCategories = getCats(category.id)
+        if (category.subCategories.length) {
+          const sumFunction = (accum, {rowspan}) => accum + rowspan
+          category.rowspan = category.subCategories.reduce(sumFunction, 0)
+          category.colspan = 1
         } else {
-          cat.rowspan = 1
-          cat.colspan = 100
+          category.rowspan = 1
+          category.colspan = 100
         }
-        return cat
+        return category
       })
-      return cats
     }
 
-    Array.prototype.parseHTML = function() {
-      let html = ''
-      for (let i = 0; i < this.length; i++) {
-        if (i) html += '</tr><tr>'
-        html += `<td id='${this[i].id}' name='${this[i].name}' rowspan='${this[i].rowspan}' colspan='${this[i].colspan}'>`
-        html += `<span>${this[i].subname}</span>`
-        if (this[i].syns) html += `<p style='color:yellow;margin:0 auto'>${this[i].syns}</p>`
+    function parseArrayToHTML(array) {
+      let html = ``
+      for (let i = 0; i < array.length; i++) {
+        if (i) html += `</tr><tr>`
+        html += `<td id="${array[i].id}" name="${array[i].name}" rowspan="${array[i].rowspan}" colspan="${array[i].colspan}">`
+        html += `${array[i].name}`
         html += `</td>`
-        html += this[i].subcats.parseHTML()
+        html += parseArrayToHTML(array[i].subCategories)
       }
       return html
     }
 
-    let itms = await mdb.select(`
-      select itms.id, name, cat as supercat, ifnull(subname, name) as subname, syns
-      from itms
-      left join (
-        select of, group_concat(name separator "<span>, </span>") as syns
-        from itms_syns
-        group by of
-      ) t1 on itms.id = t1.of
-    `)
-    let catsMap = getCats(null)
-    catsMap = '<table><tr>' + catsMap.parseHTML() + '</tr></table>'
+    const sqlQuery = `select id, name, cat as superCategory from itms`
+    const purchaseCategories = await mdb.select(sqlQuery)
 
-    res.render('itms', {catsMap})
+    const categoriesMap = getCats()
+    const categoriesHTML = `<tr>`
+      + parseArrayToHTML(categoriesMap)
+      + `</tr>`
+
+    res.render(`itms`, {categoriesHTML})
   } catch(err) {
     handleError(res, err)
   }
