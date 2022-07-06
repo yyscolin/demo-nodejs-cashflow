@@ -55,10 +55,10 @@
     <tr>
       <td>Item</td>
       <td>
-        <input class='smart-input' type='text'<%=ext.tft%>>
-        <div class='smart-list'><%tfts.forEach(tft => {%>
-          <p value='<%=tft.id%>' syns='<%=tft.syns%>' class='<%=tft.class%>'><%=tft.name%></p><%})%>
-        </div>
+        <input list="item-list"<%=ext.tft%>>
+        <datalist id="item-list"><%tfts.forEach(({name}) => {%>
+          <option value="<%=name%>"><%})%>
+        </datalist>
       </td>
     </tr>
     <tr>
@@ -86,6 +86,5 @@
   <button onclick='submitForm()'>Submit</button>
   <button onclick='window.close()'>Close</button>
 </div>
-<script src='/scripts/smartInput.js'></script>
 </body>
 </html>

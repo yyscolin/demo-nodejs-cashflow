@@ -35,16 +35,15 @@ switch (table) {
   <table>
     <thead>
       <tr>
-        <th><%=tablename%></th><th>Synonyms</th>
+        <th><%=tablename%></th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody><%objs.forEach(obj => {%>
       <tr>
         <td><%=obj.name%></td>
-        <td><%-obj.syns.map(_ => _.name).join('<br>')%></td>
         <td style='text-align: center'>
-          <button class='action-button' title='Edit' onclick='window.open(`/<%=table%>/form/<%=obj.id%>`, "smartForm", "height=1080,width=1920")'>≡</button>
+          <!--button class='action-button' title='Edit' onclick='window.open(`/<%=table%>/form/<%=obj.id%>`, "smartForm", "height=1080,width=1920")'>≡</button-->
           <button class='action-button' title='Delete' style='color: red' onclick='deleteDatabaseEntry(this, "exp11", "<%=table%>", <%=obj.id%>)'>✖</button>
         </td>
       </tr><%})%>

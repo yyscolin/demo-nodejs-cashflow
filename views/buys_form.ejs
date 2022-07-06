@@ -122,10 +122,10 @@
       <tr>
         <td>Item</td>
         <td>
-          <input class='smart-input' type='text' value='<%=buy.itm%>'>
-          <div class='smart-list'><%itms.forEach(itm => {%>
-            <p value='<%=itm.id%>' syns='<%=itm.syns%>' class='<%=itm.class%>'><%=itm.name%></p><%})%>
-          </div>
+          <input list="item-list" value="<%=buy.itm%>">
+          <datalist id="item-list"><%itms.forEach(({name}) => {%>
+            <option value="<%=name%>"><%})%>
+          </datalist>
         </td>
       </tr>
       <tr>
@@ -143,10 +143,10 @@
       <tr>
         <td>Entity</td>
         <td>
-          <input class='smart-input' type="text" value='<%=buy.ent%>'>
-          <div class='smart-list'><%ents.forEach(ent => {%>
-            <p value='<%=ent.id%>' syns='<%=ent.syns%>' class='<%=ent.class%>'><%=ent.name%></p><%})%>
-          </div>
+          <input list="item-list" value="<%=buy.ent%>">
+          <datalist id="item-list"><%ents.forEach(({name}) => {%>
+            <option value="<%=name%>"><%})%>
+          </datalist>
         </td>
       </tr>
       <tr>
@@ -196,6 +196,5 @@
   <button onclick="submitForm()">SUBMIT</button>
   <button onclick="window.close()">CLOSE</button>
 </div>
-<script src="/scripts/smartInput.js"></script>
 </body>
 </html>
