@@ -50,12 +50,12 @@
   <tbody>
     <tr>
       <td>Date</td>
-      <td><input type='date'<%=ext.date%>></td>
+      <td><input type='date' value="<%=ext.date%>"></td>
     </tr>
     <tr>
       <td>Item</td>
       <td>
-        <input list="item-list"<%=ext.tft%>>
+        <input list="item-list" value="<%=ext.tft%>">
         <datalist id="item-list"><%tfts.forEach(({name}) => {%>
           <option value="<%=name%>"><%})%>
         </datalist>
@@ -71,7 +71,7 @@
     </tr>
     <tr>
       <td>Amount</td>
-      <td><input type='number'<%=ext.amt%>></td>
+      <td><input type='number' value="<%=ext.amt%>"></td>
     </tr>
     <tr>
       <td colspan='2'>
