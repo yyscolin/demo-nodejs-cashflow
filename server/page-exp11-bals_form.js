@@ -1,5 +1,4 @@
 const mdb = require('./help-all-mdb')
-const handleError = require('./help-all-handleError.js')
 const dday = new Date('2018-11-04').getTime() //Sunday of Week1
 
 module.exports = async function(req, res) {
@@ -15,6 +14,7 @@ module.exports = async function(req, res) {
     `)
     res.render('bals_form', { date, bals })
   } catch(err) {
-    handleError(res, err)
+    console.error(err)
+    res.status(500).send(`Internal server error`)
   }
 }

@@ -1,13 +1,14 @@
 const mdb = require('./help-all-mdb')
-const handleError = require('./help-all-handleError.js')
 
 module.exports = async function(req, res) {
   try {
     let id = req.params.id
     if (id != undefined) {
-      if (id != parseInt(id)) throw new Error('400::Page not found')
+      if (id != parseInt(id))
+        return res.status(404).send(`Page not found`)
       var dbResponse = await mdb.get(`select date_format(date, '%Y-%m-%d') as date, sr_acc, sr_amt, de_acc, de_amt from ints where id = ${id}`)
-      if (!dbResponse) throw new Error('400::Page not found')
+      if (!dbResponse)
+        return res.status(404).send(`Page not found`)
       var int = {
         id,
         date: ` value=${dbResponse.date}`,
@@ -30,6 +31,7 @@ module.exports = async function(req, res) {
     })
     res.render('ints_form', { int, accs, isNew })
   } catch(err) {
-    handleError(res, err)
+    console.error(err)
+    res.status(500).send(`Internal server error`)
   }
 }

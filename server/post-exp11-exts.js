@@ -1,4 +1,3 @@
-const handleError = require('./help-all-handleError')
 const mdb = require('./help-all-mdb')
 const getApiRequestId = require('./help-exp11-getApiRequestId')
 const getDatabaseIdByName = require('./help-exp11-getDatabaseIdByName')
@@ -12,9 +11,14 @@ module.exports = async function(req, res) {
     var acc = req.body.acc
     var amt = req.body.amt
     var remarks = req.body.remarks
-    fieldValidator.validateDate(date)
-    fieldValidator.validateAccountId(acc)
-    fieldValidator.validateAmount(amt)
+
+    const apiErrors = [
+      fieldValidator.validateDate(date),
+      fieldValidator.validateAccountId(acc),
+      fieldValidator.validateAmount(amt),
+    ]
+    for (const apiError of apiErrors)
+      if (apiError) return res.status(400).send(apiError)
 
     tft = await getDatabaseIdByName(`tfts`, tft)
 
@@ -26,6 +30,7 @@ module.exports = async function(req, res) {
     
     res.send()
   } catch(err) {
-    handleError(res, err)
+    console.error(err)
+    res.status(500).send(`Internal server error`)
   }
 }

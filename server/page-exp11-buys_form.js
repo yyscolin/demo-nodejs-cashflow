@@ -1,5 +1,4 @@
 const mdb = require('./help-all-mdb')
-const handleError = require('./help-all-handleError.js')
 
 const SQL_QUERY_1 = `
 select buys.id,
@@ -19,9 +18,10 @@ module.exports = async function(req, res) {
   try {
     let id = req.params.id
     if (id) {
-      if (parseInt(id) != id) throw new Error('404::Page not found')
+      const isInteger = parseInt(id) == id
+      if (!isInteger) return res.status(404).send(`Invalid ID requested`)
       var buy = await mdb.getObject(SQL_QUERY_1, [id])
-      if (!buy) throw new Error('404::Page not found')
+      if (!buy) return res.status(404).send(`Page not found`)
       buy.pays = await mdb.select(`select id, date_format(date, '%Y-%m-%d') as date, acc, amt from pays where buy = ${id}`)
       var isNew = false
     } else {
@@ -37,6 +37,7 @@ module.exports = async function(req, res) {
     ])
     res.render('buys_form', { buy, accs, ents, itms, currencies, isNew })
   } catch(err) {
-    handleError(res, err)
+    console.error(err)
+    res.status(500).send(`Internal server error`)
   }
 }

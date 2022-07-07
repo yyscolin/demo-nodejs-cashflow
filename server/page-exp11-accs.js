@@ -1,5 +1,4 @@
 const mdb = require('./help-all-mdb')
-const handleError = require('./help-all-handleError.js')
 
 module.exports = async function(req, res) {
   try {
@@ -7,6 +6,7 @@ module.exports = async function(req, res) {
     const accountsInfo = await mdb.getObjects(sqlQuery)
     res.render(`accs`, {accountsInfo})
   } catch(err) {
-    handleError(res, err)
+    console.error(err)
+    res.status(500).send(`Internal server error`)
   }
 }

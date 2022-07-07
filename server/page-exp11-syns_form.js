@@ -1,10 +1,10 @@
 const mdb = require('./help-all-mdb')
-const handleError = require('./help-all-handleError.js')
 
 module.exports = async function(req, res) {
   try {
     const [, table,, id] = req.url.split('/')
-    if (table != `itms`) throw new Error('400::Page not found')
+    if (table != `itms`)
+      return res.status(404).send(`Page not found`)
 
     const pageContext = {
       isNew: true,
@@ -14,10 +14,12 @@ module.exports = async function(req, res) {
     }
 
     if (id) {
-      if (id != parseInt(id)) throw new Error('400::Page not found')
+      if (id != parseInt(id))
+        return res.status(404).send(`Page not found`)
       const query = `select id, name, cat from itms where id=${id}`
       pageContext.obj = await mdb.get(query)
-      if (!pageContext.obj) throw new Error('400::Page not found')
+      if (!pageContext.obj)
+        return res.status(404).send(`Page not found`)
       pageContext.isNew = false
     }
 
@@ -27,6 +29,7 @@ module.exports = async function(req, res) {
     pageContext.cats = await mdb.select(query)
     res.render(`syns_form`, pageContext)
   } catch(err) {
-    handleError(res, err)
+    console.error(err)
+    res.status(500).send(`Internal server error`)
   }
 }

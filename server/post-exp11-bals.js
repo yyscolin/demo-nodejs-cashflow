@@ -1,5 +1,3 @@
-const handleError = require('./help-all-handleError')
-const con = require('./help-all-mdb')
 
 module.exports = async function(req, res) {
   try {
@@ -10,6 +8,7 @@ module.exports = async function(req, res) {
     }
     res.send()
   } catch(err) {
-    handleError(res, err)
+    console.error(err)
+    res.status(500).send(`Internal server error`)
   }
 }

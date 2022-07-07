@@ -1,5 +1,4 @@
 const mdb = require('./help-all-mdb')
-const handleError = require('./help-all-handleError.js')
 
 module.exports = async function(req, res) {
   try {
@@ -83,6 +82,7 @@ module.exports = async function(req, res) {
     
     res.render('buys', { buys, d1, d2, objss, currencies, total })
   } catch(err) {
-    handleError(res, err)
+    console.error(err)
+    res.status(500).send(`Internal server error`)
   }
 }
