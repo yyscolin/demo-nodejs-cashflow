@@ -1,13 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title></title>
+<title>Exp11 - Accounts Management Page</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="/styles/main.css" rel="stylesheet">
 <link href="/styles/action-buttons.css" rel="stylesheet">
 <link href="/styles/foot-buttons.css" rel="stylesheet">
-<script src='/scripts/deleteDatabaseEntry.js'></script>
+<script src="/scripts/jquery-3.6.0.min.js"></script>
+<script>
+  function deleteAccount(accountId, accountName) {
+    if (!confirm(`Confirm deletion: ${accountName}?`)) return
+    const payload = JSON.stringify({id: accountId})
+    const xhr = new XMLHttpRequest()
+    xhr.open(`DELETE`, `/api/account`, true)
+    xhr.setRequestHeader(`Content-Type`, `application/json`)
+    xhr.send(payload)
+    xhr.onload = function() {
+      switch(xhr.status) {
+        case 200:
+          $(`[data-account-id=${accountId}]`).remove()
+          break
+        case 500:
+          alert(`Internal Server Error #${xhr.responseText}`)
+          break
+        default:
+          alert(`Unknown Error #${xhr.responseText}`)
+      }
+    }
+  }
+</script>
 </head>
 <body>
 <% include banner %>
@@ -21,13 +43,13 @@
         <th style='text-align: center'>Actions</th>
       </tr>
     </thead>
-    <tbody><% accs.forEach(acc => {%>
-      <tr>
-        <td><%=acc.name%></td>
-        <td style='text-align: center'><%=acc.currency%></td>
-        <td style='text-align: center'>
-          <button class='action-button' onclick='window.open("/accs/form/<%=acc.id%>", "smartForm", "height=1080,width=1920")'>≡</button>
-          <button class='action-button' style='color: red' onclick='deleteDatabaseEntry(this, "exp11", "accs", <%=acc.id%>)'>✖</button>
+    <tbody><% accountsInfo.forEach(accountInfo => {%>
+      <tr data-account-id="<%=accountInfo.id%>">
+        <td><%=accountInfo.name%></td>
+        <td style="text-align: center"><%=accountInfo.currency%></td>
+        <td style="text-align: center">
+          <button class="action-button" onclick="window.open(`/accs/form/<%=accountInfo.id%>`, `smartForm`, `height=1080,width=1920`)">≡</button>
+          <button class="action-button" style="color: red" onclick="deleteAccount(<%=accountInfo.id%>, `<%=accountInfo.name%>`)">✖</button>
         </td>
       </tr><%})%>
     </tbody>

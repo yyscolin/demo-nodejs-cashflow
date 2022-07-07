@@ -6,16 +6,17 @@ const validateName = require('./help-exp11-validateName')
 
 module.exports = async function(req, res) {
   try {
-    var id = getApiRequestId(req)
-    var name = req.body.name
-    var currency = req.body.currency
-    validateName(name)
-    validateCurrency(currency)
+    const accountId = getApiRequestId(req)
+    const {name: accountName, currency: accountCurrency} = req.body
+    validateName(accountName)
+    validateCurrency(accountCurrency)
 
-    var query = `insert into accs (id, name, currency) values (${id}, "${name}", "${currency.toUpperCase()}")
-      on duplicate key update name=values(name), currency=values(currency)`
-    await mdb.postQuery(query)
-    
+    await mdb.postQuery(
+      `insert into accs (id, name, currency) values (?, ?, ?)
+        on duplicate key update name=values(name), currency=values(currency)`,
+      [accountId, accountName, accountCurrency.toUpperCase()]
+    )
+
     res.send()
   } catch(err) {
     handleError(res, err)

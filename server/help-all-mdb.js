@@ -61,8 +61,8 @@ con.getValue = async function(query, params = []) {
   return values.length ? values[0] : null
 }
 
-con.get = async function(query) {
-  let dbResponse = await con.postQuery(query)
+con.get = async function(query, params = []) {
+  let dbResponse = await con.postQuery(query, params)
   if (dbResponse.length < 1) return null
   let payload = {}
   for (let [key, value] of Object.entries(dbResponse[0])) {

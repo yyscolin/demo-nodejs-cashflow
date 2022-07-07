@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Exp11 Acc Form</title>
+<title>Exp11 - <%=pageTitle%></title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="/styles/main.css" rel="stylesheet">
@@ -11,31 +11,31 @@
 <script>
   function submitForm() {
     let data = document.querySelectorAll(`select, input`)
-    let payload = {<%if(!isNew) {%>
-      id: <%=acc.id%>,<%}%>
+    let payload = {
+      id: <%=accountInfo.id || `null`%>,
       name: data[0].value,
       currency: data[1].value
     }
-    payload.sendTo('/api/accs', '<%=isNew?'POST':'PUT'%>')
+    payload.sendTo(`/api/accs`, `<%=apiMethod%>`)
   }
 </script>
 </head>
 <body>
-<h1>Acc Form</h1>
+<h1><%=pageTitle%></h1>
 <table>
   <thead>
     <tr>
-      <th style='text-align: center' colspan='2'><%=isNew?'Entry':'Alteration'%></th>
+      <th style="text-align: center" colspan="2">Account</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td>Name</td>
-      <td><input type='text'<%-acc.name%>></td>
+      <td><input type="text" value="<%-accountInfo.name%>"></td>
     </tr>
     <tr>
       <td>Tolecy</td>
-      <td><input type='text'<%-acc.currency%>></td>
+      <td><input type="text" value="<%-accountInfo.currency%>"></td>
     </tr>
   </tbody>
 </table>

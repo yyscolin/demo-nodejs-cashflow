@@ -3,8 +3,9 @@ const handleError = require('./help-all-handleError.js')
 
 module.exports = async function(req, res) {
   try {
-    let accs = await mdb.postQuery(`select id, name, currency from accs order by name`)
-    res.render('accs', {accs})
+    const sqlQuery = `SELECT id, name, currency FROM accs ORDER BY name`
+    const accountsInfo = await mdb.getObjects(sqlQuery)
+    res.render(`accs`, {accountsInfo})
   } catch(err) {
     handleError(res, err)
   }
