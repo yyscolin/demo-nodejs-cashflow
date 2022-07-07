@@ -1,14 +1,5 @@
 const emptyValues = [null, undefined, ``]
 
-function validateAccountId(accountId) {
-  if (emptyValues.includes(accountId))
-    return `Account ID cannot be empty`
-
-  const isInteger = parseInt(accountId) == accountId
-  if (!isInteger || accountId < 1)
-    return `Invalid Account ID`
-}
-
 function validateAccountName(accountName) {
   if (emptyValues.includes(accountName))
     return `Account name cannot be empty`
@@ -53,10 +44,22 @@ function validateDate(date) {
     return `Invalid date`
 }
 
+function validateId(accountId) {
+  if (emptyValues.includes(accountId))
+    return `ID cannot be empty`
+
+  const isInteger = parseInt(accountId) == accountId
+  if (!isInteger)
+    return `ID must be an integer`
+
+  if (accountId < 1)
+    return `ID cannot be less than 1`
+}
+
 module.exports = {
-  validateAccountId,
   validateAccountName,
   validateAmount,
   validateCurrencyCode,
   validateDate,
+  validateId,
 }

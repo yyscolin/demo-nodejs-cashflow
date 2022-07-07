@@ -1,12 +1,10 @@
 const mdb = require('./help-all-mdb')
-const getApiRequestId = require('./help-exp11-getApiRequestId')
 const fieldValidator = require(`../modules/field-validator`)
 
 module.exports = async function(req, res) {
   try {
-    const accountId = getApiRequestId(req)
-    const {name: accountName, currency: accountCurrency} = req.body
-
+    const accountName = req.body.name
+    const accountCurrency = req.body.currency.toUpperCase()
     const apiErrors = [
       fieldValidator.validateAccountName(accountName),
       fieldValidator.validateCurrencyCode(accountCurrency),
@@ -14,10 +12,21 @@ module.exports = async function(req, res) {
     for (const apiError of apiErrors)
       if (apiError) return res.status(400).send(apiError)
 
+    if (req.method == `POST`) {
+      await mdb.postQuery(
+        `insert into accs (name, currency) values (?, ?)`,
+        [accountName, accountCurrency]
+      )
+      return res.send()
+    }
+
+    const accountId = req.body.id
+    const apiError = validateId(accountId)
+    if (apiError) return res.status(400).send(apiError)
+
     await mdb.postQuery(
-      `insert into accs (id, name, currency) values (?, ?, ?)
-        on duplicate key update name=values(name), currency=values(currency)`,
-      [accountId, accountName, accountCurrency.toUpperCase()]
+      `update accs set name=?, currency=? where id=?`,
+      [accountName, accountCurrency, accountId]
     )
 
     res.send()

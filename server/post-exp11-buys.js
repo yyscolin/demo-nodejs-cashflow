@@ -1,12 +1,11 @@
 const mdb = require('./help-all-mdb')
-const getApiRequestId = require('./help-exp11-getApiRequestId')
 const getDatabaseIdByName = require('./help-exp11-getDatabaseIdByName')
 const fieldValidator = require(`../modules/field-validator`)
 
 module.exports = async function(req, res) {
   let hasTransaction = false
   try {
-    var id = getApiRequestId(req)
+    let id = req.body.id
     var date = req.body.date
     var itm = req.body.itm
     var cur = req.body.cur
@@ -19,27 +18,34 @@ module.exports = async function(req, res) {
       fieldValidator.validateCurrencyCode(cur),
       fieldValidator.validateAmount(amt),
     ]
+    if (req.method == `PUT`) apiErrors.push(fieldValidator.validateId(id))
     for (const apiError of apiErrors)
       if (apiError) return res.status(400).send(apiError)
     
     if (itm) itm = await getDatabaseIdByName(`itms`, itm)
-
     if (ent) ent = await getDatabaseIdByName(`ents`, ent)
 
     await mdb.postQuery('start transaction')
     hasTransaction = true
-    var dbResponse = await mdb.postQuery(`
-      insert into buys (id, date, itm, cur, amt, ent, remarks) values (?,?,?,?,?,?,?)
-      on duplicate key update date=values(date), itm=values(itm), amt=values(amt), ent=values(ent), remarks=values(remarks)
-    `, [id, date, itm, cur, amt, ent, remarks])
+    if (req.method == `POST`) {
+      const dbResponse = await mdb.postQuery(
+        `insert into buys (date, itm, cur, amt, ent, remarks) values (?,?,?,?,?,?)`, 
+        [date, itm, cur, amt, ent, remarks]
+      )
+      id = dbResponse.insertId
+    } else {
+      await mdb.postQuery(
+        `update buys set date=?, itm=?, cur=?, amt=?, ent=?, remarks=? where id=?`,
+        [date, itm, cur, amt, ent, remarks, id]
+      )
+    }
 
     if (req.body.pays.length) {
-      if (!id) var id = dbResponse.insertId
       var pays = []
       for (const pay of req.body.pays) {
         const apiErrors = [
           fieldValidator.validateDate(pay.date),
-          fieldValidator.validateAccountId(pay.acc),
+          fieldValidator.validateId(pay.acc),
           fieldValidator.validateAmount(pay.amt),
         ]
         for (const apiError of apiErrors)

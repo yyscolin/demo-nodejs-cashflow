@@ -1,16 +1,21 @@
 const con = require('./help-all-mdb')
-const getApiRequestId = require('./help-exp11-getApiRequestId')
 const fieldValidator = require(`../modules/field-validator`)
 
 module.exports = async function(req, res) {
   try {
-    var id = getApiRequestId(req)
-    var name = req.body.name
-    const apiError = fieldValidator.validateAccountName(name)
+    const name = req.body.name
+    let apiError = fieldValidator.validateAccountName(name)
     if (apiError) return res.status(400).send(apiError)
 
-    var query = `insert into ents (id, name) values (${id}, "${name}") on duplicate key update name=values(name)`
-    await con.postQuery(query)
+    if (req.method == `POST`) {
+      await con.postQuery(`insert into ents (name) values (?)`, [name])
+      return res.send()
+    }
+
+    const id = req.body.id
+    apiError = fieldValidator.validateId(id)
+    if (apiError) return res.status(400).send(apiError)
+    await con.postQuery(`update ents set name=? where id=?`, [name, id])
 
     res.send()
   } catch(err) {

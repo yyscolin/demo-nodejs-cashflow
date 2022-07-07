@@ -1,10 +1,8 @@
 const con = require('./help-all-mdb')
-const getApiRequestId = require('./help-exp11-getApiRequestId')
 const fieldValidator = require(`../modules/field-validator`)
 
 module.exports = async function(req, res) {
   try {
-    var id = getApiRequestId(req)
     var date = req.body.date
     var sr_acc = req.body.sr_acc
     var sr_amt = req.body.sr_amt
@@ -13,17 +11,30 @@ module.exports = async function(req, res) {
 
     const apiErrors = [
       fieldValidator.validateDate(date),
-      fieldValidator.validateAccountId(sr_acc),
-      fieldValidator.validateAccountId(de_acc),
+      fieldValidator.validateId(sr_acc),
+      fieldValidator.validateId(de_acc),
       fieldValidator.validateAmount(sr_amt),
       fieldValidator.validateAmount(de_amt),
     ]
     for (const apiError of apiErrors)
       if (apiError) return res.status(400).send(apiError)
 
-    var query = `insert into ints (id, date, sr_acc, sr_amt, de_acc, de_amt) values (${id}, "${date}", ${sr_acc}, ${sr_amt}, ${de_acc}, ${de_amt})
-      on duplicate key update date=values(date), sr_acc=values(sr_acc), sr_amt=values(sr_amt), de_acc=values(de_acc), de_amt=values(de_amt)`
-    await con.postQuery(query)
+    if (req.method == `POST`) {
+      await con.postQuery(
+        `insert into ints (date, sr_acc, sr_amt, de_acc, de_amt) values (?, ?, ?, ?, ?)`,
+        [date, sr_acc, sr_amt, de_acc, de_amt]
+      )
+      return res.send()
+    }
+
+    const id = req.body.id
+    const apiError = fieldValidator.validateId(id)
+    if (apiError) return res.status(400).send(apiError)
+
+    await con.postQuery(
+      `update ints date=?, sr_acc=?, sr_amt=?, de_acc=?, de_amt=? where id=?`,
+      [date, sr_acc, sr_amt, de_acc, de_amt, id]
+    )
     
     res.send()
   } catch(err) {

@@ -4,7 +4,7 @@ const fieldValidator = require(`../modules/field-validator`)
 module.exports = async function(req, res) {
   try {
     const {id: accountId} = req.body
-    const apiError = fieldValidator.validateAccountId(accountId)
+    const apiError = fieldValidator.validateId(accountId)
     if (apiError) return res.status(400).send(apiError)
     await mdb.postQuery(`delete from accs where id=?`, [accountId])
     res.send()
