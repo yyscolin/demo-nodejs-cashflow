@@ -3,10 +3,13 @@ const handleError = require('./help-all-handleError.js')
 
 module.exports = async function(req, res) {
   try {
-    await mdb.postQuery('start transaction')
-    await mdb.postQuery(`delete from itms where cat = ${req.body.id}`)
-    await mdb.postQuery(`delete from itms where id = ${req.body.id}`)
-    await mdb.postQuery('commit')
+    const {id: purchaseCategoryId} = req.body
+
+    await mdb.postQuery(
+      `DELETE FROM itms WHERE id=?`,
+      [purchaseCategoryId]
+    )
+
     res.send()
   } catch(err) {
     handleError(res, err)
