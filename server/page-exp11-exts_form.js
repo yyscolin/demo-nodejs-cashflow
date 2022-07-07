@@ -18,7 +18,7 @@ module.exports = async function(req, res) {
 
     let accs = await mdb.postQuery(`select id, name from accs order by name`)
     accs.forEach(acc => acc.selected = (isNew && acc.id==7) || (!isNew && acc.id==ext.acc) ? ` selected='selected'` : '')
-    let tfts = await getSynsV2('tft', ext.tft)
+    let tfts = await mdb.getValues(`SELECT name FROM tfts`)
     res.render('exts_form', { ext, tfts, accs, isNew })
   } catch(err) {
     handleError(res, err)

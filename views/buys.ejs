@@ -49,7 +49,7 @@
             <input smart-class='<%=table%>' class='smart-filter-input' type='text' placeholder='Look for...'>
             <button smart-class='<%=table%>' style='display:block;width:100%'>RESET</button>
             <div smart-class='<%=table%>' class='smart-filter-list' style='max-height:300px;overflow-y:scroll;margin:0;'><%objs.forEach(obj => {%>
-              <div smart-class='<%=table%>' class='smart-filter-option' value='<%=obj.id%>' syns='<%=obj.syns%>' style='cursor:default;margin:0;width:100%'>
+              <div smart-class='<%=table%>' class='smart-filter-option' value='<%=obj.id%>' data-name='<%=obj.name%>' style='cursor:default;margin:0;width:100%'>
                 <input id='smart-filter-checkbox-<%=table%>-<%=obj.id%>' smart-class='<%=table%>' class='smart-filter-checkbox' type='checkbox' <%=obj.isChecked?'checked':''%>
                 ><label for='smart-filter-checkbox-<%=table%>-<%=obj.id%>' smart-class='<%=table%>'><%=obj.name%></label>
               </div><%})%>
@@ -77,11 +77,10 @@
           _.oninput = function() {
             let list = this.parentNode.querySelector('.smart-filter-list')
             let options = list.children
-            let regex = new RegExp(`${this.value}`, 'i')
             for (let i = 0; i < options.length; i++) {
               let option = options[i]
-              let syns = option.getAttribute('syns')
-              option.style.display = regex.test(syns) ? 'block' : 'none'
+              const isMatch = option.getAttribute('data-name') == this.value
+              option.style.display = isMatch ? 'block' : 'none'
             }
           }
           _.onblur = function(event) {

@@ -122,9 +122,9 @@
       <tr>
         <td>Item</td>
         <td>
-          <input list="item-list" value="<%=buy.itm%>">
-          <datalist id="item-list"><%itms.forEach(({name}) => {%>
-            <option value="<%=name%>"><%})%>
+          <input list="item-list-1" value="<%=buy.itm%>">
+          <datalist id="item-list-1"><%itms.forEach(itm => {%>
+            <option value="<%=itm%>"><%})%>
           </datalist>
         </td>
       </tr>
@@ -143,9 +143,9 @@
       <tr>
         <td>Entity</td>
         <td>
-          <input list="item-list" value="<%=buy.ent%>">
-          <datalist id="item-list"><%ents.forEach(({name}) => {%>
-            <option value="<%=name%>"><%})%>
+          <input list="item-list-2" value="<%=buy.ent%>">
+          <datalist id="item-list-2"><%ents.forEach(ent => {%>
+            <option value="<%=ent%>"><%})%>
           </datalist>
         </td>
       </tr>

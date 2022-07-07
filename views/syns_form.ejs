@@ -12,7 +12,6 @@
     const payload = {
       id: <%= isNew ? `undefined` : obj.id %>,
       name: objName.value,
-      subname: objSubname.value,
       cat: objCat.value,
     }
     
@@ -32,10 +31,6 @@
     <tr>
       <td>Item</td>
       <td><input id='objName' type='text' value='<%=obj.name%>'></td>
-    </tr>
-    <tr>
-      <td>Subname</td>
-      <td><input id='objSubname' type='text' value='<%=obj.subname%>'></td>
     </tr>
     <tr>
       <td>Parent</td>

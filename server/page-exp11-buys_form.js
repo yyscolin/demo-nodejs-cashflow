@@ -1,5 +1,4 @@
 const mdb = require('./help-all-mdb')
-const getSynsV2 = require('./help-exp11-getSynsV2')
 const handleError = require('./help-all-handleError.js')
 
 const SQL_QUERY_1 = `
@@ -32,8 +31,8 @@ module.exports = async function(req, res) {
 
     let [accs, ents, itms, currencies] = await Promise.all([
       mdb.getObjects(`select id, name, currency from accs order by name`),
-      getSynsV2('ent', buy.ent),
-      getSynsV2('itm', buy.itm),
+      mdb.getValues(`SELECT name FROM ents`),
+      mdb.getValues(`SELECT name FROM itms`),
       mdb.getValues(`select distinct(currency) from accs order by currency`)
     ])
     res.render('buys_form', { buy, accs, ents, itms, currencies, isNew })

@@ -56,8 +56,8 @@
       <td>Item</td>
       <td>
         <input list="item-list" value="<%=ext.tft%>">
-        <datalist id="item-list"><%tfts.forEach(({name}) => {%>
-          <option value="<%=name%>"><%})%>
+        <datalist id="item-list"><%tfts.forEach(tft => {%>
+          <option value="<%=tft%>"><%})%>
         </datalist>
       </td>
     </tr>

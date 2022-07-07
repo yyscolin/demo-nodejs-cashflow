@@ -15,7 +15,7 @@ module.exports = async function(req, res) {
 
     if (id) {
       if (id != parseInt(id)) throw new Error('400::Page not found')
-      const query = `select id, name, subname, cat from itms where id=${id}`
+      const query = `select id, name, cat from itms where id=${id}`
       pageContext.obj = await mdb.get(query)
       if (!pageContext.obj) throw new Error('400::Page not found')
       pageContext.isNew = false

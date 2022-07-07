@@ -1,18 +1,6 @@
 const mdb = require('./help-all-mdb')
 const handleError = require('./help-all-handleError.js')
 
-async function getSyns(table, checkedIds) {
-  return await mdb.postQuery(`
-    select t1.id, name, syns, ${checkedIds ? `if(t1.id in (${checkedIds}), true, false)` : 'true'} as isChecked
-    from ${table} t1
-    join (
-      select id, group_concat(syn separator "::") as syns from (
-        select id, name as syn from ${table} union select ${table}.id, ${table}_syns.name from ${table} join ${table}_syns on ${table}.id = ${table}_syns.of
-      ) tt1 group by id
-    ) t2 on t1.id = t2.id order by name
-  `)
-}
-
 module.exports = async function(req, res) {
   try {
     /** Get date range */
@@ -67,13 +55,12 @@ module.exports = async function(req, res) {
       total.fays += _.fay
     })
     let objss = {
-      bykates: await getSyns('itms', req.query.itms),
-      antitis: await getSyns('ents', req.query.ents)
+      bykates: await mdb.postQuery(`select id, name, ${req.query.itms ? `if(id in (${req.query.itms}), true, false)` : 'true'} as isChecked from itms`),
+      antitis: await mdb.postQuery(`select id, name, ${req.query.ents ? `if(id in (${req.query.ents}), true, false)` : 'true'} as isChecked from ents`),
     }
     objss.antitis.unshift({
       id: 0,
       name: '(NONE)',
-      syns: '',
       isChecked: queryEntNone ? true : false
     })
     var query = `select distinct currency,
