@@ -2,11 +2,7 @@ const handleError = require('./help-all-handleError.js')
 const mdb = require('./help-all-mdb')
 const getApiRequestId = require('./help-exp11-getApiRequestId')
 const getDatabaseIdByName = require('./help-exp11-getDatabaseIdByName')
-const validateAccount = require('./help-exp11-validateAccount')
-const validateAmount = require('./help-exp11-validateAmount')
-const validateCurrency = require('./help-exp11-validateCurrency')
-const validateDate = require('./help-exp11-validateDate')
-const validateString = require('./help-exp11-validateString')
+const fieldValidator = require(`../modules/field-validator`)
 
 module.exports = async function(req, res) {
   try {
@@ -18,24 +14,13 @@ module.exports = async function(req, res) {
     var ent = req.body.ent
     var remarks = req.body.remarks
 
-    validateDate(date)
-    validateCurrency(cur)
-    validateAmount(amt)
+    fieldValidator.validateDate(date)
+    fieldValidator.validateCurrencyCode(cur)
+    fieldValidator.validateAmount(amt)
     
-    if (itm) {
-      validateString(itm, 'Item')
-      itm = await getDatabaseIdByName('exp11', 'itms', itm)
-    }
+    if (itm) itm = await getDatabaseIdByName(`itms`, itm)
 
-    if (ent) {
-      validateString(ent, 'Entitiy')
-      ent = await getDatabaseIdByName('exp11', 'ents', ent)
-    }
-
-    if (remarks) {
-      validateString(remarks, 'Remarks')
-      remarks = remarks
-    }
+    if (ent) ent = await getDatabaseIdByName(`ents`, ent)
 
     await mdb.postQuery('start transaction')
     var dbResponse = await mdb.postQuery(`
@@ -47,9 +32,9 @@ module.exports = async function(req, res) {
       if (!id) var id = dbResponse.insertId
       var pays = []
       req.body.pays.forEach(pay => {
-        validateDate(pay.date)
-        validateAccount(pay.acc)
-        validateAmount(pay.amt)
+        fieldValidator.validateDate(pay.date)
+        fieldValidator.validateAccountId(pay.acc)
+        fieldValidator.validateAmount(pay.amt)
         pays.push([pay.id, id, pay.date, pay.acc, pay.amt])
       })
       await mdb.postQuery(`

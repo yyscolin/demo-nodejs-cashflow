@@ -1,15 +1,14 @@
 const handleError = require('./help-all-handleError')
 const mdb = require('./help-all-mdb')
 const getApiRequestId = require('./help-exp11-getApiRequestId')
-const validateCurrency = require('./help-exp11-validateCurrency')
-const validateName = require('./help-exp11-validateName')
+const fieldValidator = require(`../modules/field-validator`)
 
 module.exports = async function(req, res) {
   try {
     const accountId = getApiRequestId(req)
     const {name: accountName, currency: accountCurrency} = req.body
-    validateName(accountName)
-    validateCurrency(accountCurrency)
+    fieldValidator.validateAccountName(accountName)
+    fieldValidator.validateCurrencyCode(accountCurrency)
 
     await mdb.postQuery(
       `insert into accs (id, name, currency) values (?, ?, ?)
