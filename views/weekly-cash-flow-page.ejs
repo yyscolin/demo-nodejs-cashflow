@@ -49,7 +49,7 @@ else
   <div>
     <h3 style="display:inline-block">Account Balances</h3>
     <button class="action-button" onclick="window.open(`/balances-form/<%=pageWeekNo%>`, `form`, `height=540,width=480`)">≡</button>
-  </div>
+  </div><% if (accountBalances.length) {%>
   <table>
     <thead>
       <tr>
@@ -73,7 +73,8 @@ else
         <td><%=accountBalance.errorAmount%></td>
       </tr><%})%>
     </tbody>
-  </table>
+  </table><%} else {%>
+    <p>There are no changes in account balances to show</p><%}%>
   <div>
     <h3 style="display:inline-block">Payments</h3>
     <button class="action-button" onclick="window.open(`/purchases/form`, `form`, `height=560,width=720`)" title="Add Entry">+</button>
