@@ -11,7 +11,7 @@ async function renderWeeklyCashFlowPage(req, res) {
     const currentWeekNo = Math.ceil(weeksSinceSystemStart)
 
     let isRedirecting = false
-    const pageWeekNo = req.params.week
+    let pageWeekNo = req.params.week
     if (!pageWeekNo)
       isRedirecting = true
     else {
@@ -24,6 +24,7 @@ async function renderWeeklyCashFlowPage(req, res) {
     if (isRedirecting)
       return res.redirect(`/weekly-cash-flow/${currentWeekNo}`)
 
+    pageWeekNo = parseInt(pageWeekNo)
     const weekIndex = pageWeekNo - 1
     const [dateStart, dateEnd] = [0, 6].map(daysDiplacement => {
       const daysSinceSystemStart = weekIndex * 7 + daysDiplacement
