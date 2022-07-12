@@ -1,6 +1,7 @@
 const bodyParser = require(`body-parser`)
 const dotenv = require(`dotenv`)
 const express = require(`express`)
+const favicon = require(`serve-favicon`)
 const fs = require(`fs`)
 const https = require(`https`)
 const path = require(`path`)
@@ -21,6 +22,9 @@ const weeklyCFController = require(`./controllers/weekly-cash-flow`)
 /** bodyparser middleware */
 app.use(bodyParser.json({limit: `50mb`}))
 app.use(bodyParser.urlencoded({limit: `50mb`, extended: true}))
+
+/** favicon middleware */
+app.use(favicon(path.join(__dirname, `favicon.ico`)))
 
 /** Set session ID */
 app.use(session({
