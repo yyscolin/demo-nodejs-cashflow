@@ -47,7 +47,7 @@
       $(`#form-action-span`).html(`Insert`)
       currentEditingId = undefined
     }
-    $(`body`).css(`overflow`, `hidden`)
+    disableScrolling()
     $(`#form-window-mask`).show()
   }
 
@@ -94,7 +94,7 @@
     $(`#form-alert-box`).hide()
     $(`#form-del-btn`).off(`click`).hide()
     $(`#form-window-mask input`).val(``)
-    $(`body`).css(`overflow`, ``)
+    enableScrolling()
     currentEditingId = undefined
   }
 </script>

@@ -2,6 +2,7 @@ body {
   background-color: #2E9AFE;
   color: #FAFAFA;
   margin: 0;
+  overflow-y: scroll;
 }
 table {
   background-color: #2E64FE;
