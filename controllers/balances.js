@@ -33,7 +33,7 @@ async function putBalances(req, res) {
 
 async function renderBalancesFormPage(req, res) {
   try {
-    const systemStartDate = new Date(`2018-11-04`)
+    const systemStartDate = new Date(process.env.SYSTEM_START_DATE)
     const systemStartTime = systemStartDate.getTime()
     const daysDelta = req.params.week * 7 - 1
     const timeDelta = daysDelta * 24 * 60 * 60 * 1000

@@ -4,27 +4,27 @@ const transfersModel = require(`../models/transfers`)
 
 async function renderWeeklyCashFlowPage(req, res) {
   try {
-    const systemStartDate = new Date(`2018-11-04`)
+    const systemStartDate = new Date(process.env.SYSTEM_START_DATE)
     const systemStartTime = systemStartDate.getTime()
-    const currentWeekIndex = Math.floor(
-      (new Date().getTime() - systemStartTime) / (7 * 24 * 60 * 60 * 1000)
-    )
-    const currentWeekNo = currentWeekIndex + 1
+    const timeSinceSystemStart = new Date().getTime() - systemStartTime
+    const weeksSinceSystemStart = timeSinceSystemStart / 7 / 24 / 60 / 60 / 1000
+    const currentWeekNo = Math.ceil(weeksSinceSystemStart)
 
     let isRedirecting = false
-    if (!req.params.week)
+    const pageWeekNo = req.params.week
+    if (!pageWeekNo)
       isRedirecting = true
     else {
-      const isInteger = parseInt(req.params.week) == req.params.week
-      const isBeforeMin = req.params.week < 1
-      const isAfterMax = req.params.week > currentWeekNo
+      const isInteger = parseInt(pageWeekNo) == pageWeekNo
+      const isBeforeMin = pageWeekNo < 1
+      const isAfterMax = pageWeekNo > currentWeekNo
       isRedirecting = !isInteger || isBeforeMin || isAfterMax
     }
 
     if (isRedirecting)
       return res.redirect(`/weekly-cash-flow/${currentWeekNo}`)
 
-    const weekIndex = req.params.week - 1
+    const weekIndex = pageWeekNo - 1
     const [dateStart, dateEnd] = [0, 6].map(daysDiplacement => {
       const daysSinceSystemStart = weekIndex * 7 + daysDiplacement
       const timeSinceSystemStart = daysSinceSystemStart * 24 * 60 * 60 * 1000
@@ -47,7 +47,7 @@ async function renderWeeklyCashFlowPage(req, res) {
     res.render(`weekly-cash-flow-page`, {
       dateStart,
       dateEnd,
-      pageWeekNo: weekIndex + 1,
+      pageWeekNo,
       currentWeekNo,
       accountBalances,
       internalTransfers,
