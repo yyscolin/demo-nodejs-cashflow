@@ -1,7 +1,4 @@
 <style>
-  body {
-    margin: 0;
-  }
   #banner {
     background-color: #2E64FE;
     padding: 12px 0;
@@ -55,40 +52,39 @@
     background-color: black;
   }
 </style>
-<div id='banner'>
+<div id="banner">
   <h1>$$$Book v11</h1>
-  <div id='navbar'>
+  <div id="navbar">
     <div>
       <h3>Pages</h3>
-      <p onclick='window.location.href = "/buys"'>Buys</p>
-      <p onclick='window.location.href = "/bals"'>Balance</p>
-      <p onclick='window.location.href = "/wcfs"'>Wecafos</p>
-      <p onclick='window.location.href = "/das"'>Analysis</p>
+      <p onclick="window.location.href=`/purchases`">Purchases</p>
+      <p onclick="window.location.href=`/balances`">Account Balances</p>
+      <p onclick="window.location.href=`/weekly-cash-flow`">Weekly Cash Flow</p>
     </div>
     <div>
-      <h3>Managie</h3>
-      <p onclick='window.location.href = "/accs"'>Kacoons</p>
-      <p onclick='window.location.href = "/ents"'>Antitis</p>
-      <p onclick='window.location.href = "/itms"'>Bykates</p>
-      <p onclick='window.location.href = "/tfts"'>Tyfates</p>
+      <h3>Management</h3>
+      <p onclick="window.location.href=`/accounts`">Accounts</p>
+      <p onclick="window.location.href=`/business-entities`">Business Entities</p>
+      <p onclick="window.location.href=`/purchase-categories`">Purchase Categories</p>
+      <p onclick="window.location.href=`/transfer-types`">Transfer Types</p>
     </div>
   </div>
   <script>
-    navbar.querySelectorAll('div').forEach(_ => {
+    navbar.querySelectorAll(`div`).forEach(_ => {
       _.onclick = function() {
-        let items = this.parentNode.querySelectorAll('div')
+        let items = this.parentNode.querySelectorAll(`div`)
         for (let i = 0; i < items.length; i++) {
-          if (items[i] == this && !items[i].classList.contains('selected'))
-            items[i].classList.add('selected')
+          if (items[i] == this && !items[i].classList.contains(`selected`))
+            items[i].classList.add(`selected`)
           else
-            items[i].classList.remove('selected')
+            items[i].classList.remove(`selected`)
         }
       }
       _.onmouseover = function() {
-        this.classList.add('selected')
+        this.classList.add(`selected`)
       }
       _.onmouseout = function() {
-        this.classList.remove('selected')
+        this.classList.remove(`selected`)
       }
     })
   </script>

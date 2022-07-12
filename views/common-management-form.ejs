@@ -1,0 +1,100 @@
+<div id="form-window-mask" class="popup-window-wrapper" style="display:none">
+  <div>
+    <button class="action-button" style="position:absolute;top:-8px;right:-4px;" onclick="closeFormWindow()">✖</button>
+    <h2 style="margin-top:0"><span id="form-action-span"></span> <%=pageType.singular%></h2><%
+    typeAttributes.forEach(typeAttr => {%>
+    <div style="margin-right:0">
+      <label for="<%=typeAttr.name%>-field" style="display:inline-block"><%=typeAttr.label%>:</label><%
+      const nameInCamelCaps = typeAttr.nameInCamelCaps || typeAttr.name
+      switch (typeAttr.type) {
+        case `datalist`:%>
+        <input id="<%=typeAttr.name%>-field" name="<%=nameInCamelCaps%>" list="<%=typeAttr.name%>-item-list" style="display:inline-block;width:400px">
+        <datalist id="<%=typeAttr.name%>-item-list"><%typeAttr.options.forEach(optionName => {%>
+          <option value="<%=optionName%>"><%})%>
+        </datalist><%
+          break
+        default:%>
+      <input id="<%=typeAttr.name%>-field" name="<%=nameInCamelCaps%>" style="display:inline-block;width:400px"><%}%>
+    </div><%})%>
+    <p id="form-alert-box" style="color:saddlebrown;font-weight:700;display:none"></p>
+    <div class="foot-buttons-box">
+      <button onclick="submitForm()">SUBMIT</button>
+      <button id="form-del-btn" style="display:none">DELETE</button>
+    </div>
+  </div>
+</div>
+<script>
+  let currentEditingId
+
+  function openFormWindow(rowId, rowInfo) {
+    if (rowId) {
+      $(`#form-action-span`).html(`Edit`)
+      $(`#form-window-mask input`).each((i, inputField) => {
+        const attrName = $(inputField).attr(`name`)
+        $(inputField).val(
+          rowInfo[attrName]
+            .replace(/&lt;/g, `<`)
+            .replace(/&gt;/g, `>`)
+            .replace(/&quot;/g, `"`)
+            .replace(/&#39;/g, `'`)   
+            .replace(/&amp;/g, `&`)
+        )
+      })
+      $(`#form-del-btn`).show()
+        .on(`click`, () => deleteEntry(`/api/<%=pageType.dashes%>`, rowId))
+      currentEditingId = rowId
+    } else {
+      $(`#form-action-span`).html(`Insert`)
+      currentEditingId = undefined
+    }
+    $(`body`).css(`overflow`, `hidden`)
+    $(`#form-window-mask`).show()
+  }
+
+  function submitForm() {
+    const editingId = currentEditingId
+    const apiEndpoint = `/api/<%=pageType.dashes%>`
+    const payload = {}
+    let apiMethod = `POST`
+    if (editingId) {
+      payload.id = editingId
+      apiMethod = `PUT`
+    }
+
+    $(`#form-window-mask input`).each((i, inputField) => {
+      const attributeName = $(inputField).attr(`name`)
+      payload[attributeName] = $(inputField).val()
+    }).prop(`disabled`, true)
+
+    $(`#form-alert-box`).html(`Please wait...`).show()
+    $(`#form-window-mask button`).prop(`disabled`, true)
+
+    const xhr = new XMLHttpRequest()
+    xhr.open(apiMethod, apiEndpoint, true)
+    xhr.setRequestHeader(`Content-Type`, `application/json`)
+    xhr.send(JSON.stringify(payload))
+    xhr.onload = function() {
+      if (xhr.status < 200 || xhr.status >= 300) {
+        $(`#form-window-mask button`).prop(`disabled`, false)
+        $(`#form-window-mask input`).prop(`disabled`, false)
+
+        const errorMessage = xhr.responseText || xhr.statusText
+        $(`#form-alert-box`).html(`Error: ${errorMessage}`)
+        return
+      }
+
+      $(`#form-alert-box`).html(`Submission successfully completed!`)
+      // setTimeout(() => closeFormWindow(), 1000)
+      setTimeout(() => window.location.reload(), 1000)
+    }
+  }
+
+  function closeFormWindow() {
+    $(`#form-window-mask`).hide()
+    $(`#form-alert-box`).hide()
+    $(`#form-del-btn`).off(`click`).hide()
+    $(`#form-window-mask input`).val(``)
+    $(`body`).css(`overflow`, ``)
+    currentEditingId = undefined
+  }
+</script>

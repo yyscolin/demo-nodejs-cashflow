@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Exp11 - Purchase Form</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="/styles/main.css" rel="stylesheet" type="text/css">
+<link href="/styles/foot-buttons.css" rel="stylesheet" type="text/css">
+<link href="/styles/action-buttons.css" rel="stylesheet" type="text/css">
+<script src="/scripts/jquery-3.6.0.min.js"></script>
+<script src="/scripts/form.js"></script>
+<script>
+  function addRow() {
+    const paymentTable = document.getElementById(`pays-form`)
+    const isFirstRow = paymentTable.children.length < 1
+    const buyCurrency = $(`#purchase-currency`).val()
+    const purchaseDate = isFirstRow ? ` value="${$(`#purchase-date`).val()}"` : ``
+    const purchaseAmount = isFirstRow ? ` value="-${$(`#purchase-amount`).val()}"` : ``
+    const paymentRow = document.createElement(`tr`)
+    paymentRow.innerHTML = `
+      <td style="width:120px">
+        <input class="input-date" type="date"${purchaseDate}>
+      </td>
+      <td style="width:120px">
+        <select class="input-account"><%
+        for (const accountInfo of accountsInfo) {%>
+          <option value="<%=accountInfo.id%>" data-currency="<%=accountInfo.currency%>"><%=accountInfo.name%></option><%}%>
+        </select>
+      </td>
+      <td style="width:120px">
+        <input class="input-amount" type="number" ${purchaseAmount} >
+      </td>
+      <td style="text-align:center">
+        <button class="action-button" title="Delete" style="color: red" onclick="deleteRow(this)">✖</button>
+      </td>`
+
+    $(paymentRow).find(`option:not([data-currency="${buyCurrency}"])`).css("color", "red")
+
+    const selectedAccount = $(paymentRow).find(`option[data-currency="${buyCurrency}"]`)[0]
+    $(selectedAccount).prop("selected", true)
+
+    paymentTable.appendChild(paymentRow)
+  }
+
+  function deleteRow(button) {
+    if(!confirm(`Are you sure?`)) return
+
+    const row = button.parentNode.parentNode
+    $(row).remove()
+
+    const paymentId = row.getAttribute(`data-row-id`)
+    if (!paymentId) return
+
+    const payload = JSON.stringify({id: paymentId})
+    const xhr = new XMLHttpRequest()
+    xhr.open(`DELETE`, `/api/payment`, true)
+    xhr.setRequestHeader(`Content-Type`, `application/json`)
+    xhr.send(payload)
+    xhr.onload = function() {
+      if (xhr.status < 200 || xhr.status >= 300) {
+        const errorMessage = xhr.responseText || xhr.statusText
+        return alert(`Error: ${errorMessage}`)
+      }
+      window.opener.location.reload()
+    }
+  }
+
+  function submitForm() {
+    const apiMethod = `<%= apiMethod %>`
+
+    const payload = {
+      id: <%= purchaseInfo.id || `null` %>,
+      date: $(`#purchase-date`).val() || null,
+      category: $(`#purchase-category`).val() || null,
+      currency: $(`#purchase-currency`).val() || null,
+      amount: $(`#purchase-amount`).val() || null,
+      entity: $(`#business-entity`).val() || null,
+      remarks: $(`#remarks`).val() || null,
+      payments: [],
+    }
+
+    $(`#pays-form>tr`).each((index, row) => {
+      payload.payments.push({
+        id: $(row).attr(`data-row-id`) || null,
+        date: $(row).find(`.input-date`).val() || null,
+        accountId: $(row).find(`.input-account`).val() || null,
+        amount: $(row).find(`.input-amount`).val() || null,
+      })
+    })
+
+    sendPayload(payload, `/api/purchase`, apiMethod)
+  }
+</script>
+<style>
+  #buy-form tr:last-child>td { /*remarks box*/
+    border: 0;
+    padding: 0;
+  }
+  textarea {
+    border: 0;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    margin-top: 4px;
+    padding: 0;
+    resize: none;
+    width: 100%;
+  }
+
+  #pays-form>tr:not([data-row-id])>td>* {
+    color: green;
+  }
+</style>
+</head>
+<body>
+<div id="main-box">
+  <h1>Purchase Form</h1>
+  <table>
+    <thead>
+      <tr>
+        <th colspan="2" style="text-align: center">Purchase</th>
+      </tr>
+    </thead>
+    <tbody id="buy-form">
+      <tr>
+        <td>Date</td>
+        <td><input id="purchase-date" type="date" value="<%=purchaseInfo.date%>"></td>
+      </tr>
+      <tr>
+        <td>Item</td>
+        <td>
+          <input id="purchase-category" list="item-list-1" value="<%=purchaseInfo.purchaseCategory%>">
+          <datalist id="item-list-1"><%purchaseCategories.forEach(purchaseCategory => {%>
+            <option value="<%=purchaseCategory.name%>"><%})%>
+          </datalist>
+        </td>
+      </tr>
+      <tr>
+        <td>Currency</td>
+        <td>
+          <select id="purchase-currency"><%currencies.forEach(currency => {
+            const selectedAttr = purchaseInfo.currency == currency ? `selected` : ``%>
+            <option value="<%=currency%>" <%=selectedAttr%>><%=currency%></option><%})%>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>Amount</td>
+        <td><input id="purchase-amount" type="number" value="<%=purchaseInfo.amount%>"></td>
+      </tr>
+      <tr>
+        <td>From</td>
+        <td>
+          <input id="business-entity" list="item-list-2" value="<%=purchaseInfo.businessEntity%>">
+          <datalist id="item-list-2"><%businessEntities.forEach(businessEntity => {%>
+            <option value="<%=businessEntity.name%>"><%})%>
+          </datalist>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <textarea id="remarks" placeholder="remarks"><%=purchaseInfo.remarks%></textarea>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div id="pays-header-box">
+    <h1 style="display: inline-block">Payments</h1>
+    <button class="action-button" onclick="addRow()">+</button>
+  </div>
+  <table id="pays-form-box">
+    <thead>
+      <tr>
+        <th style="width:128px">Date</th>
+        <th style="width:128px">Account</th>
+        <th style="width:128px">Amount</th>
+        <th>Action(s)</th>
+      </tr>
+    </thead>
+    <tbody id="pays-form"><%purchaseInfo.payments.forEach(payment => {%>
+      <tr data-row-id="<%=payment.id%>">
+        <td style="width:120px">
+          <input class="input-date" type="date" value="<%=payment.date%>">
+        </td>
+        <td style="width:120px">
+          <select class="input-account"><%accountsInfo.forEach(accountInfo => {
+            const selected = accountInfo.id == payment.accountId ? ` selected` : ``%>
+            <option value="<%=accountInfo.id%>"<%=selected%>><%=accountInfo.name%></option><%})%>
+          </select>
+        </td>
+        <td style="width:120px">
+          <input class="input-amount" type="number" value="<%=payment.amount%>">
+        </td>
+        <td style="text-align:center">
+          <button class="action-button" title="Delete" style="color:red" onclick="deleteRow(this)">✖</button>
+        </td>
+      </tr><%})%>
+    </tbody>
+  </table>
+</div>
+<p id="message-box" style="display: none"></p>
+<script>setSuccessMessage()</script>
+<div class="foot-buttons-box">
+  <button onclick="submitForm()">SUBMIT</button>
+  <button onclick="window.close()">CLOSE</button>
+</div>
+</body>
+</html>

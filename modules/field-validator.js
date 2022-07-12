@@ -1,65 +1,62 @@
 const emptyValues = [null, undefined, ``]
 
-function validateAccountName(accountName) {
-  if (emptyValues.includes(accountName))
-    return `Account name cannot be empty`
+function checkAmount(amountName, amountValue) {
+  if (emptyValues.includes(amountValue))
+    return `${amountName} cannot be empty`
 
-  if (typeof(accountName) != `string`)
-    return `Invalid account name`
-
-  if (!/^[a-zA-Z0-9_\-]*$/.test(accountName)) return
-    `Account name can only contain alphanumeric and hyphens and underscores`
-
-  if (accountName.length > 48)
-    return `Account name cannot exceed 48 characters long`
-}
-
-function validateAmount(amount) {
-  if (emptyValues.includes(amount))
-    return `Amount cannot be empty`
-
-  const isFloat = parseFloat(amount) == amount
+  const isFloat = parseFloat(amountValue) == amountValue
   if (!isFloat)
-    return `Invalid amount`
+    return `Invalid ${amountName}`
 }
 
-function validateCurrencyCode(currencyCode) {
+function checkCurrencyCode(fieldName, currencyCode) {
   if (emptyValues.includes(currencyCode))
-    return `Currency cannot be empty`
+    return `${fieldName} cannot be empty`
 
   if (typeof(currencyCode) != `string`)
-    return `Invalid currency`
+    return `Invalid ${fieldName}`
 
   if (!/^[a-zA-Z]{3}$/.test(currencyCode))
-    return `Currency must be 3 alphabets long`
+    return `${fieldName} must be 3 alphabets long`
 }
 
-function validateDate(date) {
-  if (emptyValues.includes(date))
-    return `Date cannot be empty`
+function checkDate(dateName, dateValue) {
+  if (emptyValues.includes(dateValue))
+    return `${dateName} cannot be empty`
 
-  date = new Date(date)
-  const isValidDate = date instanceof Date && !isNaN(date)
+  dateValue = new Date(dateValue)
+  const isValidDate = dateValue instanceof Date && !isNaN(dateValue)
   if (!isValidDate)
-    return `Invalid date`
+    return `Invalid ${dateName}`
 }
 
-function validateId(accountId) {
-  if (emptyValues.includes(accountId))
-    return `ID cannot be empty`
+function checkId(idName, idValue) {
+  if (emptyValues.includes(idValue))
+    return `${idName} cannot be empty`
 
-  const isInteger = parseInt(accountId) == accountId
+  const isInteger = parseInt(idValue) == idValue
   if (!isInteger)
-    return `ID must be an integer`
+    return `${idName} must be an integer`
 
-  if (accountId < 1)
-    return `ID cannot be less than 1`
+  if (idValue < 1)
+    return `${idName} cannot be less than 1`
+}
+
+function checkString(attrName, attrValue, maxLength) {
+  if (emptyValues.includes(attrValue))
+    return `${attrName} cannot be empty`
+
+  if (typeof(attrValue) != `string`)
+    return `Invalid ${attrName}`
+
+  if (attrValue.length > maxLength)
+    return `${attrName} cannot exceed 72 characters long`
 }
 
 module.exports = {
-  validateAccountName,
-  validateAmount,
-  validateCurrencyCode,
-  validateDate,
-  validateId,
+  checkAmount,
+  checkCurrencyCode,
+  checkDate,
+  checkId,
+  checkString,
 }

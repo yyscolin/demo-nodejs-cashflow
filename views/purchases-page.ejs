@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Exp11 - Purchases</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="/styles/main.css" rel="stylesheet" type="text/css" media="all">
+<link href="/styles/action-buttons.css" rel="stylesheet" type="text/css" media="all">
+<link href="/styles/foot-buttons.css" rel="stylesheet" type="text/css" media="all">
+<script src="/scripts/jquery-3.6.0.min.js"></script>
+<script src="/scripts/page-script-purchases.src.js" defer></script>
+<style>
+  td>p {
+    display: inline-block;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    margin: 0;
+    width: inherit;
+  }
+</style>
+</head>
+<body>
+<% include banner %>
+<% include delete-confirmation-prompt %>
+<div id="filtersBox" style="display:none;position:fixed;width:100vw;height:100vh;top:0;background-color:rgba(0,0,0,0.7);">
+  <table style="display:block;margin:28vh auto;width:max-content">
+    <thead>
+      <tr>
+        <th colspan="2" style="text-align:center;position:relative">
+          <span>FILTERS</span>
+          <button class="action-button" style="position:absolute;top:0;right:2px" onclick="filtersBox.style.display=`none`">✖</button>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>From Date</td>
+        <td><input id="date-start-filter" type="date" name="dateStart" value="<%=dateStart%>"></td>
+      </tr>
+      <tr>
+        <td>To Date</td>
+        <td><input id="date-end-filter" type="date" name="dateEnd" value="<%=dateEnd%>"></td>
+      </tr><%for (let [table, idName, filterItems] of [
+        [`Purchase Categories`, `categories-filter`, purchaseCategories],
+        [`Purchased From`, `entities-filter`, businessEntities],
+      ]) {%>
+      <tr>
+        <td><%=table%></td>
+        <td class="smart-filter">
+          <input id="<%=idName%>" smart-class="<%=table%>" class="smart-filter-display" type="text" value="<%=filterItems.displayValue%>" data-value="<%=filterItems.dataValue%>">
+          <div smart-class="<%=table%>" class="smart-filter-box" style="display:none;position:absolute;background-color:#2E64DE;padding:8px;margin-left:-8px;border:1px solid white">
+            <button class="action-button" style="position:absolute;right:-12px;top:-12px">✖</button>
+            <input smart-class="<%=table%>" class="smart-filter-input" type="text" placeholder="Look for...">
+            <button smart-class="<%=table%>" style="display:block;width:100%">RESET</button>
+            <div smart-class="<%=table%>" class="smart-filter-list" style="max-height:300px;overflow-y:scroll;margin:0;"><%filterItems.forEach(({id, name, isChecked}) => {%>
+              <div smart-class="<%=table%>" class="smart-filter-option" value="<%=id%>" data-name="<%=name%>" style="cursor:default;margin:0;width:100%">
+                <input id="smart-filter-checkbox-<%=table%>-<%=id%>" smart-class="<%=table%>" class="smart-filter-checkbox" type="checkbox" <%= isChecked ? `checked` : `` %>>
+                <label for="smart-filter-checkbox-<%=table%>-<%=id%>" smart-class="<%=table%>"><%=name%></label>
+              </div><%})%>
+            </div>
+          </div>
+        </td>
+      </tr><%}%>
+      <tr>
+        <td>Currency</td>
+        <td>
+          <select id="currency-filter"><%currencies.forEach(({code, selectedAttr}) => {%>
+            <option <%=selectedAttr%>><%=code%></option><%})%>
+          </select>
+        </td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2" style="border:none;text-align:center">
+          <button onclick="clearFilters()">CLEAR ALL</button>
+          <button onclick="submitForm()">SUBMIT</button>
+        </td>
+      </tr>
+      <script>
+        function clearFilters() {
+          $(`td>input`).val(``)
+          $(`.smart-filter-display`).attr(`data-value`, ``)
+          $(`.smart-filter-checkbox`).prop(`checked`, false)
+        }
+
+        function submitForm() {
+          const dateStart = $(`#date-start-filter`).val()
+          const dateEnd = $(`#date-end-filter`).val()
+          const purchaseCatsIds = $(`#categories-filter`).attr(`data-value`)
+          const businessEntitiesIds = $(`#entities-filter`).attr(`data-value`)
+          const currency = $(`#currency-filter`).val()
+
+          const queries = []
+          queries.push(`date-start=${dateStart}`)
+          queries.push(`date-end=${dateEnd}`)
+          if (purchaseCatsIds)
+            queries.push(`purchase-categories=${purchaseCatsIds}`)
+          if (businessEntitiesIds)
+            queries.push(`business-entities=${businessEntitiesIds}`)
+          if (currency) queries.push(`currency=${currency}`)
+
+          window.location.replace(`/purchases?${queries.join(`&`)}`)
+        }
+      </script>
+    </tfoot>
+  </table>
+</div>
+<div id="main-box">
+  <h1>Purchases</h1><%if (purchasesInfo.length) {%>
+  <table data-table-type="purchase">
+    <thead>
+      <tr>
+        <th>Purchase Date</th>
+        <th>Purchase Category</th>
+        <th>Purchased From</th>
+        <th>Purchase Amount</th>
+        <th>Outstanding Payment</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody><%purchasesInfo.forEach(purchaseInfo => {
+      if (purchaseInfo.remarks) purchaseInfo.itm += `${/ /.test(purchaseInfo.remarks)?`<br>`:` `}${purchaseInfo.remarks}`%>
+      <tr>
+        <td style="width:90px"><p><%=purchaseInfo.date%></p></td>
+        <td style="width:180px" title="<%=purchaseInfo.remarks%>"><p><%-purchaseInfo.itm%></p></td>
+        <td style="width:180px"><p><%=purchaseInfo.ent%></p></td>
+        <td style="width:90px"><p><%=purchaseInfo.buy%></p></td>
+        <td style="width:90px"><p><%=purchaseInfo.paid%></p></td>
+        <td style="text-align:center">
+          <button class="action-button" title="Edit" onclick="window.open(`/purchases/form/<%=purchaseInfo.id%>`, `smartForm`, `height=560,width=720`)">≡</button>
+          <button class="action-button" style="color:red" onclick="deleteEntry(`/api/purchase`, <%=purchaseInfo.id%>)">✖</button>
+        </td>
+      </tr><%})%>
+      <tr>
+        <td colspan="3" style="text-align:right">TOTAL</td>
+        <td><%=totalPurchaseAmt%></td>
+        <td><%=totalOutstandingAmt%></td>
+        <td style="text-align:center"><%=currencies.find(_ => _.selectedAttr).code%></td>
+      </tr>
+    </tbody>
+  </table><%} else {%>
+  <p>There are no entries to show.</p><%}%>
+  <div class="foot-buttons-box">
+    <button onclick="filtersBox.style.display=`block`">FILTERS</button>
+    <button onclick="window.open(`/purchases/form`, `smartForm`, `height=560,width=720`)">INSERT</button>
+  </div>
+</div>
+</body>
+</html>

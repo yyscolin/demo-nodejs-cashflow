@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Exp11 - External Transfer Form</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/scripts/form.js"></script>
+<link href="/styles/main.css" rel="stylesheet">
+<link href="/styles/foot-buttons.css" rel="stylesheet">
+<link href="/styles/action-buttons.css" rel="stylesheet" type="text/css" media="all">
+<script src="/scripts/jquery-3.6.0.min.js"></script>
+<style>
+  tr:last-child>td { /*remarks box*/
+    border: 0;
+    padding: 0;
+  }
+  textarea {
+    border: 0;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    margin-top: 4px;
+    padding: 0;
+    resize: none;
+    width: 100%;
+  }
+</style>
+<script>
+  function submitForm() {
+    const payload = {
+      id: <%= transferInfo.id || `null` %>,
+      date: $(`#input-date`).val(),
+      type: $(`#input-type`).val(),
+      accountId: $(`#input-account`).val(),
+      amount: $(`#input-amount`).val(),
+      remarks: $(`#input-remarks`).val(),
+    }
+    sendPayload(payload, `/api/external-transfer`, `<%=apiMethod%>`)
+  }
+</script>
+</head>
+<body>
+<h1>External Transfer Form</h1>
+<table>
+  <thead>
+    <tr>
+      <th colspan="2" style="text-align: center;">External Transfer</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Date</td>
+      <td><input id="input-date" type="date" value="<%=transferInfo.date%>"></td>
+    </tr>
+    <tr>
+      <td>Item</td>
+      <td>
+        <input id="input-type" list="item-list" value="<%=transferInfo.transferType%>">
+        <datalist id="item-list"><%transferTypes.forEach(({name}) => {%>
+          <option value="<%=name%>"><%})%>
+        </datalist>
+      </td>
+    </tr>
+    <tr>
+      <td>Account</td>
+      <td>
+        <select id="input-account"><%accountsInfo.forEach(({id, name, selectedAttr}) => {%>
+          <option value="<%=id%>"<%=selectedAttr%>><%=name%></option><%})%>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Amount</td>
+      <td><input id="input-amount" type="number" value="<%=transferInfo.amount%>"></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <textarea id="input-remarks" placeholder="Remarks..."><%=transferInfo.remarks%></textarea>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p id="message-box" style="display: none"></p>
+<script>setSuccessMessage()</script>
+<div class="foot-buttons-box">
+  <button onclick="submitForm()">Submit</button>
+  <button onclick="window.close()">Close</button>
+</div>
+</body>
+</html>

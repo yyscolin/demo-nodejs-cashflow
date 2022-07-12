@@ -1,15 +1,26 @@
-require('dotenv').config({path: `${__dirname}/.env`});
-const https = require('https')
-const bodyParser = require('body-parser');
-const express = require('express');
-const app = express();
-const uuid = require('uuid/v4');
-const session = require('express-session');
-const fs = require('fs')
+const bodyParser = require(`body-parser`)
+const dotenv = require(`dotenv`)
+const express = require(`express`)
+const fs = require(`fs`)
+const https = require(`https`)
+const path = require(`path`)
+const session = require(`express-session`)
+const uuid = require(`uuid/v4`)
+
+const app = express()
+dotenv.config({path: path.join(__dirname, `.env`)})
+
+const accountsController = require(`./controllers/accounts`)
+const balancesController = require(`./controllers/balances`)
+const busEntitiesController = require(`./controllers/business-entities`)
+const purCategoriesController = require(`./controllers/purchase-categories`)
+const purchasesController = require(`./controllers/purchases`)
+const transfersController = require(`./controllers/transfers`)
+const weeklyCFController = require(`./controllers/weekly-cash-flow`)
 
 /** bodyparser middleware */
-app.use(bodyParser.json({limit: '50mb'}));
-app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+app.use(bodyParser.json({limit: `50mb`}))
+app.use(bodyParser.urlencoded({limit: `50mb`, extended: true}))
 
 /** Set session ID */
 app.use(session({
@@ -18,99 +29,91 @@ app.use(session({
   },
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: true
-}));
+  saveUninitialized: true,
+}))
 
 /** Check if session is authorised */
-let authorisedSession;
-app.post('/login', (req, res) => {
-  let password = req.body.id
-  if (password == 'testPassword') {
-    authorisedSession = req.sessionID;
-    res.send();
+let authorisedSession
+app.post(`/login`, (req, res) => {
+  const password = req.body.id
+  if (password == `testPassword`) {
+    authorisedSession = req.sessionID
+    res.send()
   } else
-    res.status(400).send();
+    res.status(400).send()
 })
 
 app.use((req, res, next) => {
-  let isAuthorised = req.sessionID == authorisedSession
-  let requestedIp = req.ip.split(':')[3]
-  let isBypass = true
-  let bypassIps = [
-    // 'example.com',
-    '192\.168\.[0-9]{1,3}\.[0-9]{1,3}'
+  const isAuthorised = req.sessionID == authorisedSession
+  const bypassIps = [
+    // `example.com`,
+    new RegExp(`localhost`),
+    new RegExp(`192\.168\.[0-9]{1,3}\.[0-9]{1,3}`),
   ]
-  bypassIps.forEach(ip => {
-    ip = new RegExp(ip)
-    if (ip.test(requestedIp)) isBypass = true
-  })
-
-  if (isAuthorised || isBypass) {
-    /** Allow other pages to reference resources */
-    // res.header('Access-Control-Allow-Origin', 'https://192.168.56.202')
-    // res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-
-    next();
-  }
+  const isBypass = bypassIps.find(_ => _.test(req.hostname)) != undefined
+  if (isAuthorised || isBypass)
+    next()
   else
-    res.render('login');
-});
+    res.render(`login`)
+})
 
-/** view engine */
-app.set('view engine', 'ejs');
-app.set('views', `${__dirname}/views`);
+/** View engine */
+app.set(`view engine`, `ejs`)
+app.set(`views`, path.join(__dirname, `views`))
 
-app.post('/api/buys', require('./server/post-exp11-buys'))
-app.post('/api/ints', require('./server/post-exp11-ints'))
-app.post('/api/exts', require('./server/post-exp11-exts'))
-app.post('/api/accs', require('./server/post-exp11-accs'))
-app.post('/api/ents', require('./server/post-exp11-ents'))
-app.post('/api/itms', require('./server/post-exp11-itms'))
-app.post('/api/tfts', require('./server/post-exp11-tfts'))
-app.put('/api/buys', require('./server/post-exp11-buys'))
-app.put('/api/ints', require('./server/post-exp11-ints'))
-app.put('/api/exts', require('./server/post-exp11-exts'))
-app.put('/api/accs', require('./server/post-exp11-accs'))
-app.put('/api/ents', require('./server/post-exp11-ents'))
-app.put('/api/itms', require('./server/post-exp11-itms'))
-app.put('/api/tfts', require('./server/post-exp11-tfts'))
-app.put('/api/bals', require('./server/post-exp11-bals'))
-app.delete('/api/itms', require('./server/delete-exp11-itms'))
-app.delete(`/api/account`, require(`./api/delete-account`))
-app.delete('/', (require('./server/delete-all')))
-app.get('', require('./server/page-exp11-buys'))
-app.get('/das', require('./server/page-exp11-das'))
-app.get('/buys/form/:id?', require('./server/page-exp11-buys_form'))
-app.get('/buys', require('./server/page-exp11-buys'))
-app.get('/bals/form/:week', require('./server/page-exp11-bals_form'))
-app.get('/wcfs/:week?', require('./server/page-exp11-wcfs'))
-app.get('/bals', require('./server/page-exp11-bals'))
-app.get('/ints/form/:id?', require('./server/page-exp11-ints_form'))
-app.get('/exts/form/:id?', require('./server/page-exp11-exts_form'))
-app.get('/accs/form/:id?', require('./server/page-exp11-accs_form'))
-app.get('/accs', require('./server/page-exp11-accs'))
-app.get(/^\/(ents|tfts)\/?$/, require('./server/page-exp11-syns'))
-app.get('/itms', require('./server/page-exp11-itms'))
-app.get(/^\/(ents|itms|tfts)\/form(|\/[0-9]{0,10})\/?$/, require('./server/page-exp11-syns_form'))
+/** Routing */
+app.get(``, (req, res) => res.redirect(`/purchases`))
+app.get(`/accounts`, accountsController.renderAccountsPage)
+app.get(`/balances`, balancesController.renderBalancesPage)
+app.get(`/balances-form/:week`, balancesController.renderBalancesFormPage)
+app.get(`/business-entities`, busEntitiesController.renderBusEntitiesPage)
+app.get(`/external-transfer/:id?`, transfersController.renderExtTransferForm)
+app.get(`/internal-transfer/:id?`, transfersController.renderIntTransferForm)
+app.get(`/purchase-categories`, purCategoriesController.renderPurchaseCatsPage)
+app.get(`/purchases`, purchasesController.renderPurchasesPage)
+app.get(`/purchases/form/:id?`, purchasesController.renderPurchaseForm)
+app.get(`/transfer-types`, transfersController.renderExtTransTypesPage)
+app.get(`/weekly-cash-flow/:week?`, weeklyCFController.renderWeeklyCashFlowPage)
+app.post(`/api/account`, accountsController.addAccount)
+app.post(`/api/business-entity`, busEntitiesController.addBusinessEntity)
+app.post(`/api/external-transfer`, transfersController.addExternalTransfer)
+app.post(`/api/internal-transfer`, transfersController.addInternalTransfer)
+app.post(`/api/purchase`, purchasesController.addOrEditPurchase)
+app.post(`/api/purchase-category`, purCategoriesController.addPurCategory)
+app.post(`/api/transfer-type`, transfersController.addExtTransferType)
+app.put(`/api/account`, accountsController.editAccount)
+app.put(`/api/balances`, balancesController.putBalances)
+app.put(`/api/business-entity`, busEntitiesController.editBusinessEntity)
+app.put(`/api/external-transfer`, transfersController.editExternalTransfer)
+app.put(`/api/internal-transfer`, transfersController.editInternalTransfer)
+app.put(`/api/purchase`, purchasesController.addOrEditPurchase)
+app.put(`/api/purchase-category`, purCategoriesController.editPurCategory)
+app.put(`/api/transfer-type`, transfersController.editExtTransferType)
+app.delete(`/api/account`, accountsController.deleteAccount)
+app.delete(`/api/business-entity`, busEntitiesController.deleteBusinessEntity)
+app.delete(`/api/external-transfer`, transfersController.deleteExtTransfer)
+app.delete(`/api/internal-transfer`, transfersController.deleteIntTransfer)
+app.delete(`/api/payment`, purchasesController.deletePayment)
+app.delete(`/api/purchase`, purchasesController.deletePurchase)
+app.delete(`/api/purchase-category`, purCategoriesController.deletePurCategory)
+app.delete(`/api/transfer-type`, transfersController.deleteExtTransferType)
 
-app.get(/.*\.(css|jpg|js)$/, (req, res) => {
-  let file = '/resources' + req.url
-  if (!fs.existsSync(`${__dirname}${file}`)) {
-    let splits = file.split('/')
-    splits.splice(2, 1)
-    file = splits.join('/')
-  }
-  res.sendFile(`${__dirname}${file}`)
+/* Static files */
+app.get(/^\/(images|scripts|styles)\/.+/, (req, res) => {
+  const filePath = path.join(__dirname, `/static`, req.url)
+  if (!fs.existsSync(filePath))
+    return res.status(404).send()
+  res.sendFile(filePath)
 })
 
 /** USING HTTP */
-var port = process.env.PORT_HTTP || 8080
-app.listen(port, () => {
-  console.log(`Listening on Port ${port}`)
+const httpPort = process.env.PORT_HTTP || 8080
+app.listen(httpPort, () => {
+  console.log(`Listening on Port ${httpPort}`)
 })
 
 /** HTTP redirect HTTPS */
-// const http = require('http')
+// const http = require(`http`)
 // var port1 = process.env.PORT_HTTP
 
 // http.createServer(function(req, res) {
@@ -123,14 +126,14 @@ app.listen(port, () => {
 // })
 
 /** USING HTTPS */
-var port2 = process.env.PORT_HTTPS
-if (port2) {
+const httpsPort = process.env.PORT_HTTPS
+if (httpsPort) {
   const credentials = {
-    key: fs.readFileSync(process.env.SSL_KEY, 'utf8'),
-    cert: fs.readFileSync(process.env.SSL_CRT, 'utf8')
+    key: fs.readFileSync(process.env.SSL_KEY, `utf8`),
+    cert: fs.readFileSync(process.env.SSL_CRT, `utf8`)
   }
   const httpsServer = https.createServer(credentials, app)
-  httpsServer.listen(port2, () => {
-    console.log(`Listening on Port ${port2}`)
+  httpsServer.listen(httpsPort, () => {
+    console.log(`Listening on Port ${httpsPort}`)
   })
 }

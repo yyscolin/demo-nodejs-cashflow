@@ -1,0 +1,88 @@
+body {
+  background-color: #2E9AFE;
+  color: #FAFAFA;
+  margin: 0;
+}
+table {
+  background-color: #2E64FE;
+  border: 2px solid #FAFAFA;
+  border-radius: 16px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 4px;
+  text-align: left;
+}
+th, td {
+  padding: 4px;
+}
+td {
+  border: 1px dotted white;
+}
+table tbody:first-child tr:first-child td:first-child {
+  border-top-left-radius: 8px;
+}
+table tbody:first-child tr:first-child td:last-child {
+  border-top-right-radius: 8px;
+}
+table tbody:last-child tr:last-child td:first-child {
+  border-bottom-left-radius: 8px;
+}
+table tbody:last-child tr:last-child td:last-child {
+  border-bottom-right-radius: 8px;
+}
+h1, h2, h3, h4, h5, h6, p, div {
+  width: max-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Make numer field resemble text field in webkit (Chrome) */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+/* Make numer field resemble text field in Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* select:first-child, input:first-child {
+  margin-top: 3px;
+}
+select:last-child, input:last-child {
+  margin-bottom: 3px;
+} */
+select, input:not([type=checkbox]):not([type=radio]) {
+  margin: 6px auto;
+  border: 0;
+  border-radius: 4px;
+  width: 95%;
+}
+
+.no-highlight {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+}
+
+.popup-window-wrapper {
+  background-color: rgba(0,0,0,0.7);
+  display: grid;
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  left: 0;
+  place-items: center;
+  top: 0;
+  z-index: 2;
+}
+.popup-window-wrapper>* {
+  background-color: #2E9AFE;
+  border: 1px solid white;
+  padding: 16px;
+  position: relative;
+}

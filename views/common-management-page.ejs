@@ -1,0 +1,61 @@
+<%
+pageType.dashes = pageType.singular.toLowerCase().replace(` `, `-`)
+%><!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Exp11 - <%=pageType.plural%> Management Page</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="/styles/main.css" rel="stylesheet">
+<link href="/styles/action-buttons.css" rel="stylesheet">
+<link href="/styles/foot-buttons.css" rel="stylesheet">
+<script src="/scripts/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<% include banner %>
+<% include common-management-form %>
+<% include delete-confirmation-prompt %>
+<div id="main-box">
+  <h1 style="margin-bottom: 0;"><%=pageType.plural%></h1>
+  <h2 style="margin-top: 0;">Management Page</h2>
+  <table data-table-type="<%=pageType.dashes%>"><%
+    if (locals.tableHtml) {%>
+    <style>
+      td {
+        cursor: pointer;
+        min-width: 170px;
+        text-align: center;
+      }
+    </style>
+    <%-tableHtml%><%
+    } else {%>
+    <style>
+      th:not(:first-child), td:not(:first-child) {
+        text-align: center;
+      }
+    </style>
+    <thead>
+      <tr><%
+      typeAttributes.forEach(({label}) => {%>
+        <th><%=label%></th><%})%>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody><%
+    dataRows.forEach(dataRow => {%>
+      <tr><%
+      Object.entries(dataRow.columns).forEach(([columnName, columnValue]) => {%>
+        <td><%=columnValue%></td><%})%>
+        <td>
+          <button class="action-button" onclick="openFormWindow(<%=dataRow.id%>, <%=JSON.stringify(dataRow.columns)%>)">≡</button>
+          <button class="action-button" style="color: red;" onclick="deleteEntry(`/api/<%=pageType.dashes%>`, <%=dataRow.id%>)">✖</button>
+        </td>
+      </tr><%})%>
+    </tbody><%}%>
+  </table>
+  <div class="foot-buttons-box">
+    <button onclick="openFormWindow()">INSERT</button>
+  </div>
+</div>
+</body>
+</html>

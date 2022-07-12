@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Exp11 - Internal Transfer Form</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/scripts/form.js"></script>
+<link href="/styles/main.css" rel="stylesheet" type="text/css" media="all">
+<link href="/styles/foot-buttons.css" rel="stylesheet" type="text/css" media="all">
+<link href="/styles/action-buttons.css" rel="stylesheet" type="text/css" media="all">
+<script src="/scripts/jquery-3.6.0.min.js"></script>
+<script>
+  function submitForm() {
+    const payload = {
+      id: <%= transferInfo.id || `null` %>,
+      date: $(`#input-date`).val(),
+      sourceAccount: $(`#input-source-account`).val(),
+      sourceAmount: $(`#input-source-amount`).val(),
+      targetAccount: $(`#input-target-account`).val(),
+      targetAmount: $(`#input-target-amount`).val() || $(`#input-source-amount`).val(),
+    }
+    sendPayload(payload, `/api/internal-transfer`, `<%=apiMethod%>`)
+  }
+</script>
+</head>
+<body>
+<h1>Internal Transfer Form</h1>
+<table>
+  <thead>
+    <tr>
+      <th colspan="2" style="text-align: center;">Internal Transfer</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Date</td>
+      <td><input id="input-date" type="date" value="<%=transferInfo.date%>"></td>
+    </tr>
+    <tr>
+      <td>Source</td>
+      <td>
+        <select id="input-source-account"><%accountsInfo.forEach(({id, name}) => {
+          const selectedAttr = transferInfo.sourceAccount == id ? ` selected` : ``%>
+          <option value="<%=id%>"<%=selectedAttr%>><%=name%></option><%})%>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Amount</td>
+      <td><input id="input-source-amount" type="number" value="<%=transferInfo.sourceAmount%>"></td>
+    </tr>
+    <tr>
+      <td>Destination</td>
+      <td>
+        <select id="input-target-account"><%accountsInfo.forEach(({id, name}) => {
+          const selectedAttr = transferInfo.targetAccount == id ? ` selected` : ``%>
+          <option value="<%=id%>"<%=selectedAttr%>><%=name%></option><%})%>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Amount</td>
+      <td><input id="input-target-amount" type="number" value="<%=transferInfo.targetAmount%>"></td>
+    </tr>
+  </tbody>
+</table>
+<p id="message-box" style="display: none;"></p>
+<script>setSuccessMessage()</script>
+<div class="foot-buttons-box">
+  <button onclick="submitForm()">SUBMIT</button>
+  <button onclick="window.close()">CLOSE</button>
+</div>
+</body>
+</html>

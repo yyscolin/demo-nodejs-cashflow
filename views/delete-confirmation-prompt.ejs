@@ -1,0 +1,50 @@
+<div id="confirmation-window-mask" class="popup-window-wrapper" style="display:none">
+  <div style="padding:16px 32px">
+    <h2 style="4px auto">Confirmation</h2>
+    <p>Please click CONFIRM to proceed with deleting this entry</p>
+    <p id="conf-alert-msg" style="color:saddlebrown;font-weight:700;display:none"></p>
+    <div class="foot-buttons-box">
+      <button id="conf-prompt-btn-yes">CONFIRM</button>
+      <button id="conf-prompt-btn-no" onclick="closeConfirmationWindow()">CANCEL</button>
+    </div>
+  </div>
+</div>
+<script>
+  function deleteEntry(apiEndpoint, entryId) {
+    $(`#confirmation-window-mask`).show()
+    $(`#conf-prompt-btn-yes`).on(`click`, () => {
+      $(`#conf-alert-msg`).html(`Please wait...`).show()
+      $(`#conf-prompt-btn-yes`).prop(`disabled`, true)
+      $(`#conf-prompt-btn-no`).prop(`disabled`, true)
+
+      const payload = JSON.stringify({id: entryId})
+      const xhr = new XMLHttpRequest()
+      xhr.open(`DELETE`, apiEndpoint, true)
+      xhr.setRequestHeader(`Content-Type`, `application/json`)
+      xhr.send(payload)
+      xhr.onload = function() {
+        if (xhr.status < 200 || xhr.status >= 300) {
+          $(`#conf-prompt-btn-yes`).prop(`disabled`, false)
+          $(`#conf-prompt-btn-no`).prop(`disabled`, false)
+
+          const errorMessage = xhr.responseText || xhr.statusText
+          $(`#conf-alert-msg`).html(`Error: ${errorMessage}`)
+          return
+        }
+
+        $(`#conf-prompt-btn-yes`).hide()
+        $(`#conf-prompt-btn-no`).hide()
+        $(`#conf-alert-msg`).html(`Entry succesfully deleted!`)
+        // setTimeout(() => closeConfirmationWindow(), 1000)
+        setTimeout(() => window.location.reload(), 1000)
+      }
+    })
+  }
+
+  function closeConfirmationWindow() {
+    $(`#confirmation-window-mask`).hide()
+    $(`#conf-alert-msg`).html(``).hide()
+    $(`#conf-prompt-btn-yes`).show().off(`click`)
+    $(`#conf-prompt-btn-no`).show()
+  }
+</script>

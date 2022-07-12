@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="/styles/main.css" rel="stylesheet">
+<link href="/styles/foot-buttons.css" rel="stylesheet">
+<script src="/scripts/form.js"></script>
+<script>
+  function submitForm() {
+    const payload = {
+      accountingDate: `<%= accountingDate %>`,
+      balances: [],
+    }
+    document.querySelectorAll(`input`).forEach(input => {
+      if (input.value)
+        payload.balances.push({
+          accountId: input.getAttribute(`data-account-id`),
+          amount: input.value,
+        })
+    })
+    sendPayload(payload, `/api/balances`, `PUT`)
+  }
+</script>
+</head>
+<body>
+<h1>Account Balances</h1>
+<h2>Financial Week starting on <%= accountingDate %></h2>
+<table>
+  <tbody><% balancesInfo.forEach(balanceInfo => {%>
+    <tr>
+      <td><%= balanceInfo.accountName %></td>
+      <td>
+        <input data-account-id="<%= balanceInfo.accountId %>" type="number" value="<%= balanceInfo.amount %>">
+      </td>
+    </tr><%})%>
+  </tbody>
+</table>
+<p id="message-box" style="display: none;"></p>
+<div class="foot-buttons-box">
+  <button onclick="submitForm()">SUBMIT</button>
+  <button onclick="window.close()">CLOSE</button>
+</div>
+</body>
+</html>
