@@ -2,70 +2,79 @@ const mysqlConnection = require(`../modules/mysql-connection`)
 
 function getBalancesOfWeek(accountingDate) {
   const sqlQuery = `
-    SELECT id AS accountId, name AS accountName, IFNULL(amt, "") AS amount
-    FROM accs
+    SELECT account_id AS accountId,
+      account_name AS accountName,
+      IFNULL(balance_amount, "") AS amount
+    FROM accounts
     LEFT JOIN (
-      SELECT acc,
-        amt FROM bals
-      WHERE date=?
-    ) t ON accs.id=t.acc
-    ORDER BY name`
+      SELECT account_id,
+        balance_amount FROM account_balances
+      WHERE balance_date=?
+    ) t USING(account_id)
+    ORDER BY account_name`
   return mysqlConnection.getObjects(sqlQuery, [accountingDate])
 }
 
 function getAccountBalancesInDateRange(dateStart, dateEnd) {
   const sqlQuery = `
-    SELECT name AS accountName,
-    startingAmount,
-    IFNULL(pays, 0) AS paymentAmount,
-    IFNULL(ROUND(ints, 2), 0) AS internalTransferAmount,
-    IFNULL(exts, 0) AS externalTransferAmount,
-    balance AS balanceAmount,
-    startingAmount-balance+IFNULL(pays,0)+IFNULL(ints,0)+IFNULL(exts,0) AS errorAmount
+    SELECT account_name AS accountName,
+      startingAmount,
+      IFNULL(paymentAmount, 0) AS paymentAmount,
+      IFNULL(it_amount, 0) AS internalTransferAmount,
+      IFNULL(et_amount, 0) AS externalTransferAmount,
+      balanceAmount,
+      startingAmount-balanceAmount+IFNULL(paymentAmount,0)+IFNULL(it_amount,0)+IFNULL(et_amount,0) AS errorAmount
     FROM (
-      SELECT acc, amt AS startingAmount
-      FROM bals
-      WHERE (date, acc) IN (
-        SELECT MAX(date), acc
-        FROM (
-          SELECT date, acc FROM bals
-          WHERE date<?
-        ) t GROUP BY acc
+      SELECT account_id,
+        balance_amount AS startingAmount
+      FROM account_balances
+      WHERE (balance_date, account_id) IN (
+        SELECT MAX(balance_date), account_id
+        FROM account_balances
+        WHERE balance_date<?
+        GROUP BY account_id
       )
-    ) t
+    ) t1
     RIGHT JOIN (
-      SELECT acc, amt AS balance FROM bals
-      WHERE id IN (
-        SELECT MAX(id) FROM bals
-        WHERE date>=? AND date<=?
-        GROUP BY acc
+      SELECT account_id,
+        balance_amount AS balanceAmount
+      FROM account_balances
+      WHERE balance_id IN (
+        SELECT MAX(balance_id)
+        FROM account_balances
+        WHERE balance_date>=? AND balance_date<=?
+        GROUP BY account_id
       )
-    ) balance USING (acc)
+    ) t2 USING(account_id)
     LEFT JOIN (
-      SELECT acc, sum(amt) AS pays
-      FROM pays
-      WHERE date>=? AND date<=?
-      GROUP BY acc
-    ) pays USING (acc)
+      SELECT account_id,
+        sum(payment_amount) AS paymentAmount
+      FROM payments
+      WHERE payment_date>=? AND payment_date<=?
+      GROUP BY account_id
+    ) t3 USING(account_id)
     LEFT JOIN (
-      SELECT acc, sum(amt) AS ints
+      SELECT account_id, sum(amt) AS it_amount
       FROM (
-        SELECT sr_acc AS acc, sr_amt*-1 AS amt
-        FROM ints
-        WHERE date>=? AND date<=?
+        SELECT source_account_id AS account_id,
+          source_amount * -1 AS amt
+        FROM internal_transfers
+        WHERE internal_transfer_date>=? AND internal_transfer_date<=?
         UNION ALL
-        SELECT de_acc AS acc, de_amt AS amt
-        FROM ints
-        WHERE date>=? AND date<=?
-      ) t GROUP BY acc
-    ) ints USING (acc) LEFT JOIN (
-      SELECT acc, sum(amt) AS exts
-      FROM exts
-      WHERE date>=? AND date<=?
-      GROUP BY acc
-    ) exts USING (acc) JOIN
-    accs ON acc=accs.id
-    ORDER BY acc`
+        SELECT destination_account_id,
+          destination_amount AS amt
+        FROM internal_transfers
+        WHERE internal_transfer_date>=? AND internal_transfer_date<=?
+      ) t GROUP BY account_id
+    ) t4 USING(account_id)
+    LEFT JOIN (
+      SELECT account_id, sum(external_transfer_amount) AS et_amount
+      FROM external_transfers
+      WHERE external_transfer_date>=? AND external_transfer_date<=?
+      GROUP BY account_id
+    ) t5 USING(account_id)
+    JOIN accounts USING(account_id)
+    ORDER BY account_id`
   return mysqlConnection.getObjects(sqlQuery, [
     dateStart, dateStart, dateEnd, dateStart, dateEnd,
     dateStart, dateEnd, dateStart, dateEnd, dateStart, dateEnd
@@ -74,24 +83,29 @@ function getAccountBalancesInDateRange(dateStart, dateEnd) {
 
 function getCurrentBalances() {
   const sqlQuery = `
-    SELECT id,
-      name,
-      amt AS amount
+    SELECT account_id AS id,
+      account_name AS name,
+      balance_amount AS amount
     FROM (
-      SELECT t1.acc,
-        t1.amt
-      FROM bals t1
-        JOIN (
-          SELECT acc, max(date) AS date FROM bals GROUP BY acc
-        ) t2 ON t1.date=t2.date AND t1.acc=t2.acc
-    ) t3 JOIN accs ON t3.acc=accs.id`
+      SELECT *
+      FROM account_balances
+      JOIN (
+        SELECT account_id,
+          max(balance_date) AS balance_date
+        FROM account_balances
+        GROUP BY account_id
+      ) t1 USING(balance_date, account_id)
+    ) t2
+    JOIN accounts USING(account_id)`
   return mysqlConnection.getObjects(sqlQuery)
 }
 
 function putBalances(balancesInfo) {
   const sqlQuery = `
-    INSERT INTO bals (date, acc, amt) VALUES ?
-    ON DUPLICATE KEY UPDATE date=VALUES(date), acc=VALUES(acc), amt=VALUES(amt)`
+    INSERT INTO account_balances (balance_date, account_id, balance_amount) VALUES ?
+    ON DUPLICATE KEY UPDATE balance_date=VALUES(balance_date),
+      account_id=VALUES(account_id),
+      balance_amount=VALUES(balance_amount)`
   return mysqlConnection.postQuery(sqlQuery, [balancesInfo])
 }
 

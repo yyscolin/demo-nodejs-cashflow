@@ -2,14 +2,20 @@ const mysqlConnection = require(`../modules/mysql-connection`)
 
 async function addOrEditPayments(purchaseId, newPayments=[], oldPayments=[]) {
   if (newPayments.length) {
-    const sqlQuery = `INSERT INTO pays (id, buy, date, acc, amt) VALUES ?`
+    const sqlQuery = `
+      INSERT INTO payments (
+        payment_id, purchase_id, payment_date, account_id, payment_amount
+      ) VALUES ?`
     const sqlParams = newPayments.map(payment =>
       [payment.id, purchaseId, payment.date, payment.accountId, payment.amount]
     )
     await mysqlConnection.postQuery(sqlQuery, [sqlParams])
   }
   if (oldPayments.length) {
-    const sqlQuery = `UPDATE pays SET date=?, acc=?, amt=? WHERE id=?`
+    const sqlQuery = `
+      UPDATE payments
+      SET payment_date=?, account_id=?, payment_amount=?
+      WHERE payment_id=?`
     const sqlQueries = oldPayments.map(payment => mysqlConnection.format(
       sqlQuery, [payment.date, payment.accountId, payment.amount, payment.id]
     ))
@@ -27,8 +33,15 @@ async function addPurchase(
   newPayments,
   oldPayments
 ) {
-  const sqlQuery = `INSERT INTO buys (date, itm, cur, amt, ent, remarks)
-    VALUES (?,?,?,?,?,?)`
+  const sqlQuery = `
+    INSERT INTO purchases (
+      purchase_date,
+      purchase_category_id,
+      purchase_currency,
+      purchase_amount,
+      business_entity_id,
+      remarks
+    ) VALUES (?,?,?,?,?,?)`
   const dbResponse = await mysqlConnection.postQuery(sqlQuery, [
     purchaseDate,
     purCatId,
@@ -42,13 +55,13 @@ async function addPurchase(
 }
 
 function deletePayment(paymentId) {
-  const sqlQuery = `DELETE FROM pays WHERE id=?`
+  const sqlQuery = `DELETE FROM payments WHERE payment_id=?`
   return mysqlConnection.postQuery(sqlQuery, [paymentId])
 }
 
 
 function deletePurchase(purchaseId) {
-  const sqlQuery = `DELETE FROM buys WHERE id=?`
+  const sqlQuery = `DELETE FROM purchases WHERE purchase_id=?`
   return mysqlConnection.postQuery(sqlQuery, [purchaseId])
 }
 
@@ -64,8 +77,14 @@ async function editPurchase(
   oldPayments
 ) {
   const sqlQuery = `
-    UPDATE buys SET date=?, itm=?, cur=?, amt=?, ent=?, remarks=?
-    WHERE id=?`
+    UPDATE purchases
+    SET purchase_date=?,
+      purchase_category_id=?,
+      purchase_currency=?,
+      purchase_amount=?,
+      business_entity_id=?,
+      remarks=?
+    WHERE purchase_id=?`
   await mysqlConnection.postQuery(sqlQuery, [
     purchaseDate,
     purCatId,
@@ -80,7 +99,8 @@ async function editPurchase(
 
 async function getNonExistPayments(paymentIds=[]) {
   if (!paymentIds.length) return []
-  const sqlQuery = `SELECT id FROM pays WHERE id in (?)`
+  const sqlQuery = `
+    SELECT payment_id AS id FROM payments WHERE payment_id in (?)`
   const dbPayments = await mysqlConnection.getObjects(sqlQuery, [paymentIds])
   const dbPaymentIds = dbPayments.map(({id}) => id)
   return paymentIds.filter(paymentId => !dbPaymentIds.includes(paymentId))
@@ -88,46 +108,48 @@ async function getNonExistPayments(paymentIds=[]) {
 
 async function getPaymentsInDateRange(dateStart, dateEnd) {
   const sqlQuery = `
-    SELECT pays.id AS paymentId,
-      buy AS purchaseId,
-      DATE_FORMAT(pays.date, "%Y-%m-%d") AS date,
-      itms.name AS purchaseCategory,
-      accs.name AS accountName,
-      pays.amt AS amount,
-      ents.name AS businessEntity,
+    SELECT payment_id AS paymentId,
+      purchase_id AS purchaseId,
+      DATE_FORMAT(payment_date, "%Y-%m-%d") AS date,
+      purchase_category_name AS purchaseCategory,
+      account_name AS accountName,
+      payment_amount AS amount,
+      business_entity_name AS businessEntity,
       remarks
-    FROM pays
-      JOIN buys ON pays.buy=buys.id
-      JOIN accs ON pays.acc=accs.id
-      JOIN itms ON buys.itm=itms.id
-      LEFT JOIN ents ON buys.ent=ents.id
-    WHERE pays.date>=? AND pays.date<=?
-    ORDER BY pays.date`
+    FROM payments
+      JOIN purchases USING(purchase_id)
+      JOIN accounts USING(account_id)
+      JOIN purchase_categories USING(purchase_category_id)
+      LEFT JOIN business_entities USING(business_entity_id)
+    WHERE payment_date>=? AND payment_date<=?
+    ORDER BY payment_date`
   return mysqlConnection.getObjects(sqlQuery, [dateStart, dateEnd])
 }
 
 async function getPurchaseInfo(purchaseId) {
   const sqlQuery1 = `
-    SELECT buys.id,
-      DATE_FORMAT(date, "%Y-%m-%d") AS date,
-      itms.name AS purchaseCategory,
-      cur AS currency,
-      amt AS amount,
-      ents.name AS businessEntity,
+    SELECT purchase_id AS id,
+      DATE_FORMAT(purchase_date, "%Y-%m-%d") AS date,
+      purchase_category_name AS purchaseCategory,
+      purchase_currency AS currency,
+      purchase_amount AS amount,
+      business_entity_name AS businessEntity,
     remarks
-    FROM buys
-      LEFT JOIN itms on buys.itm=itms.id
-      LEFT JOIN ents on buys.ent=ents.id
-    WHERE buys.id=?`
+    FROM purchases
+      LEFT JOIN purchase_categories USING(purchase_category_id)
+      LEFT JOIN business_entities USING(business_entity_id)
+    WHERE purchase_id=?`
+
   const purchaseInfo = await mysqlConnection.getObject(sqlQuery1, [purchaseId])
   if (!purchaseInfo) return null
 
   const sqlQuery2 = `
-    SELECT id,
-      DATE_FORMAT(date, "%Y-%m-%d") AS date,
-      acc AS accountId, amt AS amount
-    FROM pays
-    WHERE buy=?`
+    SELECT payment_id AS id,
+      DATE_FORMAT(payment_date, "%Y-%m-%d") AS date,
+      account_id AS accountId,
+      payment_amount AS amount
+    FROM payments
+    WHERE purchase_id=?`
   const payments = await mysqlConnection.getObjects(sqlQuery2, [purchaseId])
   purchaseInfo.payments = payments
   return purchaseInfo
@@ -137,44 +159,44 @@ function getPurchasesInfo(sqlConditions) {
   const {dateStart, dateEnd, currency, purCatIds, busEntIds} = sqlConditions
 
   let sqlQuery = `
-    SELECT buys.id,
-      DATE_FORMAT(date, "%Y-%m-%d") AS date,
-      itms.name AS itm,
-      ents.name AS ent,
-      buys.amt AS buy,
+    SELECT purchase_id AS id,
+      DATE_FORMAT(purchase_date, "%Y-%m-%d") AS date,
+      purchase_category_name AS itm,
+      business_entity_name AS ent,
+      purchase_amount AS buy,
       remarks,
-      (buys.amt + IFNULL(pays.amt, 0)) AS paid
-    FROM buys LEFT JOIN (
-      SELECT buy,
-        sum(amt) AS amt
-      FROM pays
-      GROUP BY buy
-    ) pays ON buys.id=pays.buy
-      LEFT JOIN itms ON buys.itm=itms.id
-      LEFT JOIN ents ON buys.ent=ents.id
-    WHERE buys.cur=?`
+      (purchase_amount + IFNULL(payment_amount, 0)) AS paid
+    FROM purchases LEFT JOIN (
+      SELECT purchase_id,
+        sum(payment_amount) AS payment_amount
+      FROM payments
+      GROUP BY purchase_id
+    ) payments USING(purchase_id)
+      LEFT JOIN purchase_categories USING(purchase_category_id)
+      LEFT JOIN business_entities USING(business_entity_id)
+    WHERE purchase_currency=?`
   const sqlParams = [currency]
 
   if (dateStart) {
-    sqlQuery += ` AND date>=?`
+    sqlQuery += ` AND purchase_date>=?`
     sqlParams.push(dateStart)
   }
 
   if (dateEnd) {
-    sqlQuery += ` AND date<=?`
+    sqlQuery += ` AND purchase_date<=?`
     sqlParams.push(dateEnd)
   }
   
   if (purCatIds) {
-    sqlQuery += ` AND itm IN (?)`
+    sqlQuery += ` AND purchase_category_id IN (?)`
     sqlParams.push(purCatIds)
   }
 
   if (busEntIds) {
-    sqlQuery += ` AND (ent IN (?)`
+    sqlQuery += ` AND (business_entity_id IN (?)`
     sqlParams.push(busEntIds)
     const canBeNull = busEntIds.find(_ => _ == 0) != undefined
-    if (canBeNull) sqlQuery += ` OR ent IS NULL`
+    if (canBeNull) sqlQuery += ` OR business_entity_id IS NULL`
     sqlQuery += `)`
   }
   sqlQuery += ` ORDER BY date`

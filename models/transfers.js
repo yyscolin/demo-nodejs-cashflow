@@ -4,15 +4,20 @@ function addExternalTransfer(
   transferDate, transTypeId, accountId, transferAmount, remarks
 ) {
   const sqlQuery = `
-    INSERT INTO exts (date, tft, acc, amt, remarks)
-    VALUES (?,?,?,?,?)`
+    INSERT INTO external_transfers (
+      external_transfer_date,
+      transfer_type_id,
+      account_id,
+      external_transfer_amount,
+      remarks
+    ) VALUES (?,?,?,?,?)`
   return mysqlConnection.postQuery(sqlQuery, [
     transferDate, transTypeId, accountId, transferAmount, remarks
   ])
 }
 
 function addExtTransferType(transTypeName) {
-  const sqlQuery = `INSERT INTO tfts (name) VALUES (?)`
+  const sqlQuery = `INSERT INTO transfer_types (transfer_type_name) VALUES (?)`
   return mysqlConnection.postQuery(sqlQuery, [transTypeName])
 }
 
@@ -20,25 +25,30 @@ function addInternalTransfer(
   transferDate, sourceAccount, sourceAmount, targetAccount, targetAmount
 ) {
   const sqlQuery = `
-    INSERT INTO ints (date, sr_acc, sr_amt, de_acc, de_amt)
-    VALUES (?,?,?,?,?)`
+    INSERT INTO internal_transfers (
+      internal_transfer_date,
+      source_account_id,
+      source_amount,
+      destination_account_id,
+      destination_amount
+    ) VALUES (?,?,?,?,?)`
   return mysqlConnection.postQuery(sqlQuery, [
     transferDate, sourceAccount, sourceAmount, targetAccount, targetAmount,
   ])
 }
 
 function deleteExtTransfer(transferId) {
-  const sqlQuery = `DELETE FROM exts WHERE id=?`
+  const sqlQuery = `DELETE FROM external_transfers WHERE external_transfer_id=?`
   return mysqlConnection.postQuery(sqlQuery, [transferId])
 }
 
 function deleteExtTransferType(transTypeId) {
-  const sqlQuery = `DELETE FROM tfts WHERE id=?`
+  const sqlQuery = `DELETE FROM transfer_types WHERE transfer_type_id=?`
   return mysqlConnection.postQuery(sqlQuery, [transTypeId])
 }
 
 function deleteIntTransfer(transferId) {
-  const sqlQuery = `DELETE FROM ints WHERE id=?`
+  const sqlQuery = `DELETE FROM internal_transfers WHERE internal_transfer_id=?`
   return mysqlConnection.postQuery(sqlQuery, [transferId])
 }
 
@@ -46,15 +56,21 @@ function editExternalTransfer(
   transferId, transferDate, transTypeId, accountId, transferAmount, remarks
 ) {
   const sqlQuery = `
-    UPDATE exts SET date=?, tft=?, acc=?, amt=?, remarks=?
-    WHERE id=?`
+    UPDATE external_transfers
+    SET external_transfer_date=?,
+      transfer_type_id=?,
+      account_id=?,
+      external_transfer_amount=?,
+      remarks=?
+    WHERE external_transfer_id=?`
   return mysqlConnection.postQuery(sqlQuery, [
     transferDate, transTypeId, accountId, transferAmount, remarks, transferId
   ])
 }
 
 function editExtTransferType(transTypeId, transTypeName) {
-  const sqlQuery = `UPDATE tfts SET name=? WHERE id=?`
+  const sqlQuery = `
+    UPDATE transfer_types SET transfer_type_name=? WHERE transfer_type_id=?`
   return mysqlConnection.postQuery(sqlQuery, [transTypeName, transTypeId])
 }
 
@@ -63,8 +79,13 @@ function editInternalTransfer(
   sourceAmount, targetAccount, targetAmount
 ) {
   const sqlQuery = `
-    UPDATE ints SET date=?, sr_acc=?, sr_amt=?, de_acc=?,
-    de_amt=? WHERE id=?`
+    UPDATE internal_transfers
+    SET internal_transfer_date=?,
+      source_account_id=?,
+      source_amount=?,
+      destination_account_id=?,
+      destination_amount=?
+    WHERE internal_transfer_id=?`
   return mysqlConnection.postQuery(sqlQuery, [
     transferDate, sourceAccount, sourceAmount,
     targetAccount, targetAmount, transferId,
@@ -73,72 +94,82 @@ function editInternalTransfer(
 
 function getExternalTransferInfo(transferId) {
   const sqlQuery = `
-    SELECT exts.id,
-      date_format(date, "%Y-%m-%d") AS date,
-      name AS transferType,
-      acc,
-      amt AS amount,
+    SELECT external_transfer_id AS id,
+      DATE_FORMAT(external_transfer_date, "%Y-%m-%d") AS date,
+      transfer_type_name AS transferType,
+      account_id AS acc,
+      external_transfer_amount AS amount,
       remarks
-    FROM exts join tfts ON exts.tft=tfts.id
-    WHERE exts.id=?`
+    FROM external_transfers
+    JOIN transfer_types USING(transfer_type_id)
+    WHERE external_transfer_id=?`
   return mysqlConnection.getObject(sqlQuery, [transferId])
 }
 
 async function getExtTransferTypeId(transTypeName) {
-  let sqlQuery = `SELECT id FROM tfts WHERE name=?`
+  let sqlQuery = `
+    SELECT transfer_type_id AS id
+    FROM transfer_types
+    WHERE transfer_type_name=?`
   let dbResponse = await mysqlConnection.getObject(sqlQuery, [transTypeName])
   if (dbResponse) return dbResponse.id
 
-  sqlQuery = `INSERT INTO tfts (name) VALUES (?)`
+  sqlQuery = `INSERT into transfer_types (transfer_type_name) VALUES (?)`
   dbResponse = await mysqlConnection.postQuery(sqlQuery, [transTypeName])
   return dbResponse.insertId
 }
 
 function getExtTransferTypes() {
-  const sqlQuery = `SELECT id, name FROM tfts`
+  const sqlQuery = `
+    SELECT transfer_type_id AS id,
+      transfer_type_name AS name
+    FROM transfer_types`
   return mysqlConnection.getObjects(sqlQuery)
 }
 
 function getExternalTransfersInDateRange(dateStart, dateEnd) {
   const sqlQuery = `
-    SELECT exts.id,
-      DATE_FORMAT(date, "%Y-%m-%d") AS date,
-      tfts.name AS transferType,
-      accs.name AS accountName,
-      amt AS amount,
+    SELECT external_transfer_id AS id,
+      DATE_FORMAT(external_transfer_date, "%Y-%m-%d") AS date,
+      transfer_type_name AS transferType,
+      account_name AS accountName,
+      external_transfer_amount AS amount,
       --remarks IS NOT NULL AS hasRemarks
-    FROM exts
-      LEFT JOIN tfts ON exts.tft=tfts.id
-      JOIN accs ON exts.acc=accs.id
-    WHERE date>=? AND date<=?
-    ORDER BY date`
+    FROM external_transfers
+      LEFT JOIN transfer_types USING(transfer_type_id)
+      JOIN accounts USING (account_id)
+    WHERE external_transfer_date>=?
+      AND external_transfer_date<=?
+    ORDER BY external_transfer_date`
   return mysqlConnection.getObjects(sqlQuery, [dateStart, dateEnd])
 }
 
 function getInternalTransferInfo(transferId) {
   const sqlQuery = `
-    SELECT id,
-      DATE_FORMAT(date, "%Y-%m-%d") AS date,
-      sr_acc AS sourceAccount,
-      sr_amt AS sourceAmount,
-      de_acc AS targetAccount,
-      de_amt AS targetAmount
-    FROM ints WHERE id=?`
+    SELECT internal_transfer_id AS id,
+      DATE_FORMAT(internal_transfer_date, "%Y-%m-%d") AS date,
+      source_account_id AS sourceAccount,
+      source_amount AS sourceAmount,
+      destination_account_id AS targetAccount,
+      destination_amount AS targetAmount
+    FROM internal_transfers
+    WHERE internal_transfer_id=?`
   return mysqlConnection.getObject(sqlQuery, [transferId])
 }
 
 function getInternalTransfersInDateRange(dateStart, dateEnd) {
   const sqlQuery = `
-    SELECT ints.id,
-      DATE_FORMAT(date, "%Y-%m-%d") AS date,
-      t1.name AS sourceAccountName,
-      t2.name AS targetAccountName,
-      sr_amt AS sourceAmount,
-      de_amt AS targetAmount
-    FROM ints
-      JOIN accs t1 ON ints.sr_acc=t1.id
-      JOIN accs t2 ON ints.de_acc=t2.id
-    WHERE date>=? AND date<=?
+    SELECT internal_transfer_id AS id,
+      DATE_FORMAT(internal_transfer_date, "%Y-%m-%d") AS date,
+      t1.account_name AS sourceAccountName,
+      t2.account_name AS targetAccountName,
+      source_amount AS sourceAmount,
+      destination_amount AS targetAmount
+    FROM internal_transfers
+      JOIN accounts t1 ON t1.account_id=source_account_id
+      JOIN accounts t2 ON t2.account_id=destination_account_id
+    WHERE internal_transfer_date>=?
+      AND internal_transfer_date<=?
     ORDER BY date,
       sourceAccountName,
       targetAccountName,
