@@ -132,6 +132,7 @@ function getExternalTransfersInDateRange(dateStart, dateEnd) {
     SELECT external_transfer_id AS id,
       DATE_FORMAT(external_transfer_date, "%Y-%m-%d") AS date,
       transfer_type_name AS transferType,
+      account_id AS accountId,
       account_name AS accountName,
       external_transfer_amount AS amount,
       --remarks IS NOT NULL AS hasRemarks
@@ -161,6 +162,8 @@ function getInternalTransfersInDateRange(dateStart, dateEnd) {
   const sqlQuery = `
     SELECT internal_transfer_id AS id,
       DATE_FORMAT(internal_transfer_date, "%Y-%m-%d") AS date,
+      source_account_id AS sourceAccountId,
+      destination_account_id AS targetAccountId,
       t1.account_name AS sourceAccountName,
       t2.account_name AS targetAccountName,
       source_amount AS sourceAmount,

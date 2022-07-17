@@ -112,6 +112,7 @@ async function getPaymentsInDateRange(dateStart, dateEnd) {
       purchase_id AS purchaseId,
       DATE_FORMAT(payment_date, "%Y-%m-%d") AS date,
       purchase_category_name AS purchaseCategory,
+      account_id AS accountId,
       account_name AS accountName,
       payment_amount AS amount,
       business_entity_name AS businessEntity,
