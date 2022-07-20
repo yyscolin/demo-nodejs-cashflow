@@ -34,32 +34,6 @@ else
 <link href="/styles/foot-buttons.css" rel="stylesheet" type="text/css" media="all">
 <script src="/scripts/main.src.js" defer></script>
 <script src="/scripts/jquery-3.6.0.min.js"></script>
-<script>
-  async function deleteEntry(entryType, rowId) {
-    const promptResponse = await openPromptWindow(
-      `Confirm Deletion`,
-      `Click CONFIRM button to confirm the deletion of this entry`,
-      [`CONFIRM`, `CANCEL`],
-    )
-    if (promptResponse != `CONFIRM`) return
-
-    $.ajax({
-      url: `/api/${entryType}`,
-      type: `DELETE`,
-      contentType: `application/json`,
-      data: JSON.stringify({id: rowId}),
-      success: async (data, textStatus, jqXHR) => {
-        $(`[data-${entryType}-id=${rowId}]`).remove()
-        await openPromptWindow(
-          `Deletion Completed`,
-          `This entry was successfully deleted`,
-          [`OK`]
-        )
-      },
-      error: handleAjaxError,
-    })
-  }
-</script>
 </head>
 <body>
 <% include banner %>
@@ -120,7 +94,7 @@ else
       </tr>
     </thead>
     <tbody><%payments.forEach(payment => {%>
-      <tr data-payment-id="<%=payment.paymentId%>">
+      <tr data-purchase-id="<%=payment.purchaseId%>" data-payment-id="<%=payment.paymentId%>">
         <td><%=payment.date%></td>
         <td><%=payment.purchaseCategory%></td>
         <td><%=payment.businessEntity%></td>
@@ -128,7 +102,7 @@ else
         <td><%=payment.amount%></td>
         <td style="text-align: center;">
           <button class="action-button" title="Edit" onclick="openPurchaseForm(<%=payment.purchaseId%>)">≡</button>
-          <button class="action-button" style="color:red" onclick="deletePayment(<%=payment.paymentId%>)">✖</button>
+          <button class="action-button" style="color:red" onclick="deleteEntry(`payment`, <%=payment.paymentId%>)">✖</button>
         </td>
       </tr><%})%>
     </tbody>

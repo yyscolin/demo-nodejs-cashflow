@@ -37,7 +37,10 @@
             .replace(/&amp;/g, `&`)
         )
       })
-      $(`#form-del-btn`).on(`click`, () => deleteEntry(rowId)).show()
+      $(`#form-del-btn`).on(
+        `click`,
+        () => deleteEntry(`<%=pageType.dashes%>`, rowId)
+      ).show()
       $(`#form-sub-btn`).off(`click`).on(`click`, () => submitForm(rowId))
     } else {
       $(`#form-action-span`).html(`Insert`)
@@ -92,32 +95,6 @@
     resetManagementForm()
     $(`#form-window-mask`).hide()
     enableScrolling()
-  }
-
-  async function deleteEntry(rowId) {
-    const promptResponse = await openPromptWindow(
-      `Confirm Deletion`,
-      `Click CONFIRM button to confirm the deletion of this entry`,
-      [`CONFIRM`, `CANCEL`],
-    )
-    if (promptResponse != `CONFIRM`) return
-
-    $.ajax({
-      url: `/api/<%=pageType.dashes%>`,
-      type: `DELETE`,
-      contentType: `application/json`,
-      data: JSON.stringify({id: rowId}),
-      success: async (data, textStatus, jqXHR) => {
-        // $(`#data-row-id=${rowId}`).remove()
-        await openPromptWindow(
-          `Deletion Completed`,
-          `This entry was successfully deleted`,
-          [`OK`]
-        )
-        window.location.reload()
-      },
-      error: handleAjaxError,
-    })
   }
 
   resetManagementForm()

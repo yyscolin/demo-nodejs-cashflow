@@ -133,7 +133,7 @@
         <td style="width:90px"><p><%=purchaseInfo.paid%></p></td>
         <td style="text-align:center">
           <button class="action-button" title="Edit" onclick="openPurchaseForm(<%=purchaseInfo.id%>)">≡</button>
-          <button class="action-button" style="color:red" onclick="deletePurchase(<%=purchaseInfo.id%>)">✖</button>
+          <button class="action-button" style="color:red" onclick="deleteEntry(`purchase`, <%=purchaseInfo.id%>)">✖</button>
         </td>
       </tr><%})%>
       <tr>

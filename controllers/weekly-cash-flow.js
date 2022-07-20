@@ -50,7 +50,6 @@ async function renderWeeklyCashFlowPage(req, res) {
       purchaseCategories,
       businessEntities,
       currencies,
-
     ] = await Promise.all([
       balancesModel.getCurrentBalances(dateBefore),
       balancesModel.getCurrentBalances(dateEnd),

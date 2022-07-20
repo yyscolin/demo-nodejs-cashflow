@@ -34,12 +34,12 @@ pageType.dashes = pageType.singular.toLowerCase().replace(` `, `-`)
             <tr <%=idAttributeName%>="<%=dataRow.id%>"><%
               typeAttributes.forEach(_ => {
                 const columnName = _.nameInCamelCaps || _.name
-                const htmlDisplay = dataRow.htmlDisplay[columnName] || dataRow.columns[columnName] %>
+                const htmlDisplay = dataRow?.htmlDisplay?.[columnName] || dataRow.columns[columnName] %>
                 <td><%-htmlDisplay%></td><%
               })%>
                 <td>
                   <button class="action-button" onclick="openFormWindow(<%=dataRow.id%>, <%=JSON.stringify(dataRow.columns)%>)">≡</button><!--
-               --><button class="action-button" style="color: red;" onclick="deleteEntry(<%=dataRow.id%>)">✖</button>
+               --><button class="action-button" style="color: red;" onclick="deleteEntry(`<%=pageType.dashes%>`, <%=dataRow.id%>)">✖</button>
                 </td>
             </tr><%
           })%>

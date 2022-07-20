@@ -14,7 +14,7 @@ function openPurchaseForm(purchaseId) {
       $(`#purchase-form-fields [name=remarks]`).val(payload.remarks)
       payload.payments.forEach(addPaymentRow)
       $(`#purchase-form-del-btn`).show()
-        .on(`click`, () => deletePurchase(purchaseId))
+        .on(`click`, () => deleteEntry(`purchase`, purchaseId))
       $(`#purchase-form-sub-btn`).attr(
         `onclick`,
         `submitPurchaseForm(${purchaseId})`
@@ -48,32 +48,6 @@ function closePurchaseForm() {
   $(`#purchase-form-mask`).hide()
   resetPurchaseForm()
   enableScrolling()
-}
-
-async function deletePurchase(purchaseId) {
-  const confirmationResponse = await openPromptWindow(
-    `Confirmation`,
-    `Please click CONFIRM to proceed with deleting this entry`,
-    [`CONFIRM`, `CANCEL`],
-  )
-  if (confirmationResponse != `CONFIRM`) return
-  openPromptWindow(`Deleting Entry`, `Please wait...`)
-  $.ajax({
-    url: `/api/purchase`,
-    type: `DELETE`,
-    contentType: `application/json`,
-    data: JSON.stringify({id: purchaseId}),
-    success: (data, textStatus, jqXHR) => {
-      resetPurchaseForm()
-      $(`[data-purchase-id=${purchaseId}]`).remove()
-      openPromptWindow(
-        `Deletion Successful`,
-        `Purchase entry successfully deleted`,
-        [`OK`]
-      )
-    },
-    error: handleAjaxError,
-  })
 }
 
 function submitPurchaseForm(purchaseId) {
@@ -167,7 +141,8 @@ function addPaymentRow(paymentInfo) {
   if (paymentId) {
     fontColor = ``
     deleteButtonHTML = ``
-      + `<button onclick="deletePayment(${paymentId})">DELETE</button>`
+      + `<button onclick="deleteEntry(\`payment\`, ${paymentId})">`
+      + `DELETE</button>`
   }
   $(`#payment-records-list`).append(``
     + `<div data-payment-id="${paymentId}">`
@@ -205,35 +180,6 @@ function removePaymentRow(button) {
     $(`#payment-records-wrapper`).hide()
     $(`#no-payments-msg`).show()
   }
-}
-
-async function deletePayment(paymentId) {
-  const promptResponse = await openPromptWindow(
-    `Confirm Deletion`,
-    `Click CONFIRM button to confirm the deletion of this payment entry`,
-    [`CONFIRM`, `CANCEL`],
-  )
-  if (promptResponse != `CONFIRM`) return
-
-  $.ajax({
-    url: `/api/payment`,
-    type: `DELETE`,
-    contentType: `application/json`,
-    data: JSON.stringify({id: paymentId}),
-    success: (data, textStatus, jqXHR) => {
-      $(`[data-payment-id=${paymentId}]`).remove()
-      if (!$(`#payment-records-list>*`).length) {
-        $(`#payment-records-wrapper`).hide()
-        $(`#no-payments-msg`).show()
-      }
-      openPromptWindow(
-        `Deletion Successful`,
-        `Payment entry successfully deleted`,
-        [`OK`]
-      )
-    },
-    error: handleAjaxError,
-  })
 }
 
 resetPurchaseForm()
