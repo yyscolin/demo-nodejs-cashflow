@@ -118,38 +118,46 @@ async function renderPurchaseCatsPage(req, res) {
       {
         name: `super-cat-name`,
         nameInCamelCaps: `superCatName`,
+        isColumnHidden: true,
         label: `Parent Category`,
         type: `datalist`,
         options: purchaseCats.map(_ => _.name),
       }
     ]
   
-    function findCategoriesByParentId(superCatId) {
-      const superCatName = superCatId
-        ? purchaseCats.find(_ => _.id == superCatId).name
-        : null
+    const dataRows = []
+    function appendCategoriesByParentId(
+      superCatId,
+      superCatName=``,
+      ancestryDepth=0
+    ) {
       const categoryFilter = category => category.superCatId == superCatId
       const levelCategories = purchaseCats.filter(categoryFilter)
-      return levelCategories.map(category => {
-        if (superCatName) category.superCatName = superCatName
-        category.subCategories = findCategoriesByParentId(category.id)
-        if (category.subCategories.length) {
-          const sumFunction = (accum, {rowspan}) => accum + rowspan
-          category.rowspan = category.subCategories.reduce(sumFunction, 0)
-          category.colspan = 1
-        } else {
-          category.rowspan = 1
-          category.colspan = 100
-        }
-        return category
-      })
+
+      for (const levelCategory of levelCategories) {
+        const displayName = `&emsp;`.repeat(Math.max(ancestryDepth, 0))
+          + `➤ ${levelCategory.name}`
+
+        dataRows.push({
+          id: levelCategory.id,
+          columns:{
+            name: levelCategory.name,
+            superCatName,
+          },
+          htmlDisplay: {
+            name: displayName,
+          },
+        })
+        appendCategoriesByParentId(
+          levelCategory.id,
+          levelCategory.name,
+          ancestryDepth + 1,
+        )
+      }
     }
 
-    const nestedCategories = findCategoriesByParentId(null)
-    const tableHtml = `<tr>`
-      + parseArrayToHTML(nestedCategories)
-      + `</tr>`
-    res.render(`common-management-page`, {pageType, typeAttributes, tableHtml})
+    appendCategoriesByParentId(null)
+    res.render(`common-management-page`, {pageType, typeAttributes, dataRows})
   } catch(err) {
     console.error(err)
     res.status(500).send()

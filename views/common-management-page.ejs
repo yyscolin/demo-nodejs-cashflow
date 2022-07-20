@@ -17,46 +17,37 @@ pageType.dashes = pageType.singular.toLowerCase().replace(` `, `-`)
 <% include common-management-form %>
 <% include prompt-window %>
 <div>
-  <h1 style="margin-bottom: 0;"><%=pageType.plural%></h1>
-  <h2 style="margin-top: 0;">Management Page</h2>
-  <table><%
-    if (locals.tableHtml) {%>
-    <style>
-      td {
-        cursor: pointer;
-        min-width: 170px;
-        text-align: center;
-      }
-    </style>
-    <%-tableHtml%><%
-    } else {%>
-    <style>
-      th:not(:first-child), td:not(:first-child) {
-        text-align: center;
-      }
-    </style>
-    <thead>
-      <tr><%
-      typeAttributes.forEach(({label}) => {%>
-        <th><%=label%></th><%})%>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody><%
-    dataRows.forEach(dataRow => {%>
-      <tr><%
-      Object.entries(dataRow.columns).forEach(([columnName, columnValue]) => {%>
-        <td><%=columnValue%></td><%})%>
-        <td>
-          <button class="action-button" onclick="openFormWindow(<%=dataRow.id%>, <%=JSON.stringify(dataRow.columns)%>)">≡</button>
-          <button class="action-button" style="color: red;" onclick="deleteEntry(<%=dataRow.id%>)">✖</button>
-        </td>
-      </tr><%})%>
-    </tbody><%}%>
-  </table>
-  <div class="foot-buttons-box">
-    <button onclick="openFormWindow()">INSERT</button>
-  </div>
+    <h1 style="margin-bottom: 0;"><%=pageType.plural%></h1>
+    <h2 style="margin-top: 0;">Management Page</h2>
+    <table>
+        <thead>
+            <tr><%
+              typeAttributes = typeAttributes.filter(_ => !_.isColumnHidden)
+              typeAttributes.forEach(({label}) => {%>
+                <th><%=label%></th><%})%>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody><%
+          dataRows.forEach(dataRow => {
+            const idAttributeName = `data-${pageType.dashes}-id` %>
+            <tr <%=idAttributeName%>="<%=dataRow.id%>"><%
+              typeAttributes.forEach(_ => {
+                const columnName = _.nameInCamelCaps || _.name
+                const htmlDisplay = dataRow.htmlDisplay[columnName] || dataRow.columns[columnName] %>
+                <td><%-htmlDisplay%></td><%
+              })%>
+                <td>
+                  <button class="action-button" onclick="openFormWindow(<%=dataRow.id%>, <%=JSON.stringify(dataRow.columns)%>)">≡</button><!--
+               --><button class="action-button" style="color: red;" onclick="deleteEntry(<%=dataRow.id%>)">✖</button>
+                </td>
+            </tr><%
+          })%>
+        </tbody>
+    </table>
+    <div class="foot-buttons-box">
+      <button onclick="openFormWindow()">INSERT</button>
+    </div>
 </div>
 </body>
 </html>

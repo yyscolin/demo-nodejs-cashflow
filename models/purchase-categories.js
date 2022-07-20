@@ -43,7 +43,8 @@ function getPurchaseCatsInfo() {
     SELECT purchase_category_id AS id,
       purchase_category_name AS name,
       parent_category_id AS superCatId
-    FROM purchase_categories`
+    FROM purchase_categories
+    ORDER BY name`
   return mysqlConnection.getObjects(sqlQuery)
 }
 
