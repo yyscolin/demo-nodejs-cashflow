@@ -15,11 +15,11 @@ pageType.dashes = pageType.singular.toLowerCase().replace(` `, `-`)
 <body>
 <% include banner %>
 <% include common-management-form %>
-<% include delete-confirmation-prompt %>
-<div id="main-box">
+<% include prompt-window %>
+<div>
   <h1 style="margin-bottom: 0;"><%=pageType.plural%></h1>
   <h2 style="margin-top: 0;">Management Page</h2>
-  <table data-table-type="<%=pageType.dashes%>"><%
+  <table><%
     if (locals.tableHtml) {%>
     <style>
       td {
@@ -49,7 +49,7 @@ pageType.dashes = pageType.singular.toLowerCase().replace(` `, `-`)
         <td><%=columnValue%></td><%})%>
         <td>
           <button class="action-button" onclick="openFormWindow(<%=dataRow.id%>, <%=JSON.stringify(dataRow.columns)%>)">≡</button>
-          <button class="action-button" style="color: red;" onclick="deleteEntry(`/api/<%=pageType.dashes%>`, <%=dataRow.id%>)">✖</button>
+          <button class="action-button" style="color: red;" onclick="deleteEntry(<%=dataRow.id%>)">✖</button>
         </td>
       </tr><%})%>
     </tbody><%}%>

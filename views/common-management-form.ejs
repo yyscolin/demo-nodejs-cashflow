@@ -16,16 +16,13 @@
         default:%>
       <input id="<%=typeAttr.name%>-field" name="<%=nameInCamelCaps%>" style="display:inline-block;width:400px"><%}%>
     </div><%})%>
-    <p id="form-alert-box" style="color:saddlebrown;font-weight:700;display:none"></p>
     <div class="foot-buttons-box">
-      <button onclick="submitForm()">SUBMIT</button>
+      <button id="form-sub-btn">SUBMIT</button>
       <button id="form-del-btn" style="display:none">DELETE</button>
     </div>
   </div>
 </div>
 <script>
-  let currentEditingId
-
   function openFormWindow(rowId, rowInfo) {
     if (rowId) {
       $(`#form-action-span`).html(`Edit`)
@@ -40,61 +37,88 @@
             .replace(/&amp;/g, `&`)
         )
       })
-      $(`#form-del-btn`).show()
-        .on(`click`, () => deleteEntry(`/api/<%=pageType.dashes%>`, rowId))
-      currentEditingId = rowId
+      $(`#form-del-btn`).on(`click`, () => deleteEntry(rowId)).show()
+      $(`#form-sub-btn`).off(`click`).on(`click`, () => submitForm(rowId))
     } else {
       $(`#form-action-span`).html(`Insert`)
-      currentEditingId = undefined
     }
     disableScrolling()
     $(`#form-window-mask`).show()
   }
 
-  function submitForm() {
-    const editingId = currentEditingId
+  function submitForm(rowId) {
     const apiEndpoint = `/api/<%=pageType.dashes%>`
     const payload = {}
     let apiMethod = `POST`
-    if (editingId) {
-      payload.id = editingId
+    if (rowId) {
+      payload.id = rowId
       apiMethod = `PUT`
     }
 
     $(`#form-window-mask input`).each((i, inputField) => {
       const attributeName = $(inputField).attr(`name`)
       payload[attributeName] = $(inputField).val()
-    }).prop(`disabled`, true)
+    })
 
-    $(`#form-alert-box`).html(`Please wait...`).show()
-    $(`#form-window-mask button`).prop(`disabled`, true)
+    openPromptWindow(
+      `Submitting Form`,
+      `Form submission in progress... Please wait...`,
+    )
 
-    const xhr = new XMLHttpRequest()
-    xhr.open(apiMethod, apiEndpoint, true)
-    xhr.setRequestHeader(`Content-Type`, `application/json`)
-    xhr.send(JSON.stringify(payload))
-    xhr.onload = function() {
-      if (xhr.status < 200 || xhr.status >= 300) {
-        $(`#form-window-mask button`).prop(`disabled`, false)
-        $(`#form-window-mask input`).prop(`disabled`, false)
+    $.ajax({
+      url: apiEndpoint,
+      type: apiMethod,
+      contentType: `application/json`,
+      data: JSON.stringify(payload),
+      success: async (data, textStatus, jqXHR) => {
+        await openPromptWindow(
+          `Submission Completed`,
+          `Form has been successfully submitted`,
+          [`OK`]
+        )
+        window.location.reload()
+      },
+      error: handleAjaxError,
+    })
+  }
 
-        const errorMessage = xhr.responseText || xhr.statusText
-        $(`#form-alert-box`).html(`Error: ${errorMessage}`)
-        return
-      }
-
-      $(`#form-alert-box`).html(`Submission successfully completed!`)
-      // setTimeout(() => closeFormWindow(), 1000)
-      setTimeout(() => window.location.reload(), 1000)
-    }
+  function resetManagementForm() {
+    $(`#form-del-btn`).off(`click`).hide()
+    $(`#form-sub-btn`).off(`click`).on(`click`, () => submitForm())
+    $(`#form-window-mask input`).val(``)
   }
 
   function closeFormWindow() {
+    resetManagementForm()
     $(`#form-window-mask`).hide()
-    $(`#form-alert-box`).hide()
-    $(`#form-del-btn`).off(`click`).hide()
-    $(`#form-window-mask input`).val(``)
     enableScrolling()
-    currentEditingId = undefined
   }
+
+  async function deleteEntry(rowId) {
+    const promptResponse = await openPromptWindow(
+      `Confirm Deletion`,
+      `Click CONFIRM button to confirm the deletion of this entry`,
+      [`CONFIRM`, `CANCEL`],
+    )
+    if (promptResponse != `CONFIRM`) return
+
+    $.ajax({
+      url: `/api/<%=pageType.dashes%>`,
+      type: `DELETE`,
+      contentType: `application/json`,
+      data: JSON.stringify({id: rowId}),
+      success: async (data, textStatus, jqXHR) => {
+        // $(`#data-row-id=${rowId}`).remove()
+        await openPromptWindow(
+          `Deletion Completed`,
+          `This entry was successfully deleted`,
+          [`OK`]
+        )
+        window.location.reload()
+      },
+      error: handleAjaxError,
+    })
+  }
+
+  resetManagementForm()
 </script>

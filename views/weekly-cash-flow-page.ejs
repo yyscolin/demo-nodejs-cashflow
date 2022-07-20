@@ -34,14 +34,39 @@ else
 <link href="/styles/foot-buttons.css" rel="stylesheet" type="text/css" media="all">
 <script src="/scripts/main.src.js" defer></script>
 <script src="/scripts/jquery-3.6.0.min.js"></script>
+<script>
+  async function deleteEntry(entryType, rowId) {
+    const promptResponse = await openPromptWindow(
+      `Confirm Deletion`,
+      `Click CONFIRM button to confirm the deletion of this entry`,
+      [`CONFIRM`, `CANCEL`],
+    )
+    if (promptResponse != `CONFIRM`) return
+
+    $.ajax({
+      url: `/api/${entryType}`,
+      type: `DELETE`,
+      contentType: `application/json`,
+      data: JSON.stringify({id: rowId}),
+      success: async (data, textStatus, jqXHR) => {
+        $(`[data-${entryType}-id=${rowId}]`).remove()
+        await openPromptWindow(
+          `Deletion Completed`,
+          `This entry was successfully deleted`,
+          [`OK`]
+        )
+      },
+      error: handleAjaxError,
+    })
+  }
+</script>
 </head>
 <body>
 <% include banner %>
-<% include delete-confirmation-prompt %>
 <% include data-lists %>
 <% include purchase-form %>
 <% include prompt-window %>
-<div id="main-box">
+<div>
   <div id="main-header-week">
     <h1 style="margin-bottom:0">Weekly Cash Flow</h1>
     <div>
@@ -113,7 +138,7 @@ else
     <h3 style="display:inline-block">Internal Transfers</h3>
     <button class="action-button" onclick="window.open(`/internal-transfer`, `form`, `height=540,width=400`)" title="Add Entry">+</button>
   </div><%if (internalTransfers.length) {%>
-  <table data-table-type="internal-transfer">
+  <table>
     <thead>
       <tr>
         <th>Date</th>
@@ -123,7 +148,7 @@ else
       </tr>
     </thead>
     <tbody><%internalTransfers.forEach(internalTransfer => {%>
-      <tr>
+      <tr data-internal-transfer-id="<%=internalTransfer.id%>">
         <td><%=internalTransfer.date%></td>
         <td><%=internalTransfer.sourceAccountName%></td>
         <td><%=internalTransfer.sourceAmount%></td>
@@ -131,7 +156,7 @@ else
         <td><%=internalTransfer.targetAmount%></td>
         <td style="text-align: center;">
           <button class="action-button" title="Edit" onclick="window.open(`/internal-transfer/<%=internalTransfer.id%>`, `form`, `height=540,width=400`)">≡</button>
-          <button class="action-button" style="color: red" onclick="deleteEntry(`/api/internal-transfer`, <%=internalTransfer.id%>)">✖</button>
+          <button class="action-button" style="color: red" onclick="deleteEntry(`internal-transfer`, <%=internalTransfer.id%>)">✖</button>
         </td>
       </tr><%})%>
     </tbody>
@@ -141,7 +166,7 @@ else
     <h3 style="display:inline-block">External Transfers</h3>
     <button class="action-button" onclick="window.open(`/external-transfer`, `form`, `height=540,width=400`)" title="Add Entry">+</button>
   </div><%if (externalTransfers.length) {%>
-  <table data-table-type="external-transfer">
+  <table>
     <thead>
       <tr>
         <th>Date</th>
@@ -152,14 +177,14 @@ else
       </tr>
     </thead>
     <tbody><%externalTransfers.forEach(externalTransfer => {%>
-      <tr>
+      <tr data-external-transfer-id="<%=externalTransfer.id%>">
         <td><%=externalTransfer.date%></td>
         <td><%=externalTransfer.transferType%></td>
         <td><%=externalTransfer.accountName%></td>
         <td><%=externalTransfer.amount%></td>
         <td style="text-align: center;">
           <button class="action-button" title="Edit" onclick="window.open(`/external-transfer/<%=externalTransfer.id%>`, `form`, `height=540,width=400`)">≡</button>
-          <button class="action-button" style="color: red" onclick="deleteEntry(`/api/external-transfer`, <%=externalTransfer.id%>)">✖</button>
+          <button class="action-button" style="color: red" onclick="deleteEntry(`external-transfer`, <%=externalTransfer.id%>)">✖</button>
         </td>
       </tr><%})%>
     </tbody>
