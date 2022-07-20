@@ -108,46 +108,11 @@ async function deletePurchase(req, res) {
   }
 }
 
-async function renderPurchaseForm(req, res) {
+async function getPurchaseInfo(req, res) {
   try {
-    let purchaseInfo = {
-      date: new Date().toLocaleDateString(`fr-CA`),
-      purchaseCategory: `F&B`,
-      payments: []
-    }
-    let apiMethod = `POST`
-
     const purchaseId = req.params.id
-    if (purchaseId) {
-      const apiError = fieldValidator.checkId(`Purchase ID`, purchaseId)
-      if (apiError) return res.status(400).send(apiError)
-
-      purchaseInfo = await purchasesModel.getPurchaseInfo(purchaseId)
-      if (!purchaseInfo) return res.status(404).send(`Page not found`)
-
-      apiMethod = `PUT`
-    }
-
-    const [
-      accountsInfo,
-      businessEntities,
-      purchaseCategories,
-      currencies,
-    ] = await Promise.all([
-      accountsModel.getAccountsInfo(),
-      busEntsModel.getBusEntitiesInfo(),
-      purCatsModel.getPurchaseCatsInfo(),
-      accountsModel.getCurrencies(),
-    ])
-
-    res.render(`purchase-form`, {
-      purchaseInfo,
-      accountsInfo,
-      businessEntities,
-      purchaseCategories,
-      currencies,
-      apiMethod,
-    })
+    const purchaseInfo = await purchasesModel.getPurchaseInfo(purchaseId)
+    res.json(purchaseInfo)
   } catch(err) {
     console.error(err)
     res.status(500).send()
@@ -217,11 +182,16 @@ async function renderPurchasesPage(req, res) {
       [0, 0]
     ).map(_ => _.toFixed(2))
 
+    const accountsInfo = await accountsModel.getAccountsInfo()
+    const dataLists = {}
+
     const purchaseCategories = await purCatsModel.getPurchaseCatsInfo()
+    dataLists[`purchase-categories`] = purchaseCategories.map(_ => _.name)
     if (purCatIds)
       purchaseCategories.forEach(_ => _.isChecked = purCatIds.includes(_.id))
 
     const businessEntities = await busEntsModel.getBusEntitiesInfo()
+    dataLists[`business-entities`] = businessEntities.map(_ => _.name)
     if (busEntIds)
       businessEntities.forEach(_ => _.isChecked = busEntIds.includes(_.id))
 
@@ -232,6 +202,7 @@ async function renderPurchasesPage(req, res) {
     })
 
     let currencies = await accountsModel.getCurrencies()
+    dataLists.currencies = currencies
     currencies = currencies.map(currencyCode => {
       const selectedAttr = currencyCode == currency ? `selected` : ``
       return {code: currencyCode, selectedAttr}
@@ -254,6 +225,8 @@ async function renderPurchasesPage(req, res) {
       currencies,
       totalPurchaseAmt,
       totalOutstandingAmt,
+      dataLists,
+      accountsInfo,
     })
   } catch(err) {
     console.error(err)
@@ -265,6 +238,6 @@ module.exports = {
   addOrEditPurchase,
   deletePayment,
   deletePurchase,
-  renderPurchaseForm,
+  getPurchaseInfo,
   renderPurchasesPage,
 }

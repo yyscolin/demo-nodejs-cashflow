@@ -4,6 +4,14 @@ function disableScrolling() {
   window.onscroll = () => window.scrollTo(scrollLeft, scrollTop)
 }
 
-function enableScrolling() {
+function enableScrolling(jqXHR, textStatus, errorThrown) {
   window.onscroll = null
+}
+
+function handleAjaxError(jqXHR, textStatus, errorThrown) {
+  openPromptWindow(
+    `An Error has Occured`,
+    jqXHR.responseText || jqXHR.statusText,
+    [`OK`]
+  )
 }

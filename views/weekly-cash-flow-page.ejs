@@ -32,11 +32,15 @@ else
 <link href="/styles/main.css" rel="stylesheet" type="text/css" media="all">
 <link href="/styles/action-buttons.css" rel="stylesheet" type="text/css" media="all">
 <link href="/styles/foot-buttons.css" rel="stylesheet" type="text/css" media="all">
+<script src="/scripts/main.src.js" defer></script>
 <script src="/scripts/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 <% include banner %>
 <% include delete-confirmation-prompt %>
+<% include data-lists %>
+<% include purchase-form %>
+<% include prompt-window %>
 <div id="main-box">
   <div id="main-header-week">
     <h1 style="margin-bottom:0">Weekly Cash Flow</h1>
@@ -77,9 +81,9 @@ else
     <p>There are no changes in account balances to show</p><%}%>
   <div>
     <h3 style="display:inline-block">Payments</h3>
-    <button class="action-button" onclick="window.open(`/purchases/form`, `form`, `height=560,width=720`)" title="Add Entry">+</button>
+    <button class="action-button" onclick="openPurchaseForm()" title="Add Entry">+</button>
   </div><%if (payments.length) {%>
-  <table data-table-type="payment">
+  <table>
     <thead>
       <tr>
         <th>Date</th>
@@ -91,15 +95,15 @@ else
       </tr>
     </thead>
     <tbody><%payments.forEach(payment => {%>
-      <tr>
+      <tr data-payment-id="<%=payment.paymentId%>">
         <td><%=payment.date%></td>
         <td><%=payment.purchaseCategory%></td>
         <td><%=payment.businessEntity%></td>
         <td><%=payment.accountName%></td>
         <td><%=payment.amount%></td>
         <td style="text-align: center;">
-          <button class="action-button" title="Edit" onclick="window.open(`/purchases/form/<%=payment.purchaseId%>`, `form`, `height=560,width=720`)">≡</button>
-          <button class="action-button" style="color:red" onclick="deleteEntry(`/api/payment`, <%=payment.paymentId%>)">✖</button>
+          <button class="action-button" title="Edit" onclick="openPurchaseForm(<%=payment.purchaseId%>)">≡</button>
+          <button class="action-button" style="color:red" onclick="deletePayment(<%=payment.paymentId%>)">✖</button>
         </td>
       </tr><%})%>
     </tbody>

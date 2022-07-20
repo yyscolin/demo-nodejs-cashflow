@@ -1,5 +1,8 @@
+const accountsModel = require(`../models/accounts`)
 const balancesModel = require(`../models/balances`)
+const busEntsModel = require(`../models/business-entities`)
 const purchasesModel = require(`../models/purchases`)
+const purCatsModel = require(`../models/purchase-categories`)
 const transfersModel = require(`../models/transfers`)
 
 async function renderWeeklyCashFlowPage(req, res) {
@@ -43,12 +46,21 @@ async function renderWeeklyCashFlowPage(req, res) {
       internalTransfers,
       externalTransfers,
       payments,
+      accountsInfo,
+      purchaseCategories,
+      businessEntities,
+      currencies,
+
     ] = await Promise.all([
       balancesModel.getCurrentBalances(dateBefore),
       balancesModel.getCurrentBalances(dateEnd),
       transfersModel.getInternalTransfersInDateRange(dateStart, dateEnd),
       transfersModel.getExternalTransfersInDateRange(dateStart, dateEnd),
       purchasesModel.getPaymentsInDateRange(dateStart, dateEnd),
+      accountsModel.getAccountsInfo(),
+      purCatsModel.getPurchaseCatsInfo(),
+      busEntsModel.getBusEntitiesInfo(),
+      accountsModel.getCurrencies(),
     ])
 
     const accountBalances = accountBalancesLast.map(({id, name, amount}) => {
@@ -109,6 +121,12 @@ async function renderWeeklyCashFlowPage(req, res) {
       internalTransfers,
       externalTransfers,
       payments,
+      accountsInfo,
+      dataLists: {
+        "purchase-categories": purchaseCategories.map(_ => _.name),
+        "business-entities": businessEntities.map(_ => _.name),
+        currencies,
+      }
     })
   } catch(err) {
     console.error(err)

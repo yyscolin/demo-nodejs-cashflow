@@ -8,6 +8,7 @@
 <link href="/styles/action-buttons.css" rel="stylesheet" type="text/css" media="all">
 <link href="/styles/foot-buttons.css" rel="stylesheet" type="text/css" media="all">
 <script src="/scripts/jquery-3.6.0.min.js"></script>
+<script src="/scripts/main.src.js" defer></script>
 <script src="/scripts/page-script-purchases.src.js" defer></script>
 <style>
   td>p {
@@ -22,7 +23,9 @@
 </head>
 <body>
 <% include banner %>
-<% include delete-confirmation-prompt %>
+<% include data-lists %>
+<% include purchase-form %>
+<% include prompt-window %>
 <div id="filtersBox" style="display:none;position:fixed;width:100vw;height:100vh;top:0;background-color:rgba(0,0,0,0.7);">
   <table style="display:block;margin:28vh auto;width:max-content">
     <thead>
@@ -109,7 +112,7 @@
 </div>
 <div id="main-box">
   <h1>Purchases</h1><%if (purchasesInfo.length) {%>
-  <table data-table-type="purchase">
+  <table>
     <thead>
       <tr>
         <th>Purchase Date</th>
@@ -122,15 +125,15 @@
     </thead>
     <tbody><%purchasesInfo.forEach(purchaseInfo => {
       if (purchaseInfo.remarks) purchaseInfo.itm += `${/ /.test(purchaseInfo.remarks)?`<br>`:` `}${purchaseInfo.remarks}`%>
-      <tr>
+      <tr data-purchase-id="<%=purchaseInfo.id%>">
         <td style="width:90px"><p><%=purchaseInfo.date%></p></td>
         <td style="width:180px" title="<%=purchaseInfo.remarks%>"><p><%-purchaseInfo.itm%></p></td>
         <td style="width:180px"><p><%=purchaseInfo.ent%></p></td>
         <td style="width:90px"><p><%=purchaseInfo.buy%></p></td>
         <td style="width:90px"><p><%=purchaseInfo.paid%></p></td>
         <td style="text-align:center">
-          <button class="action-button" title="Edit" onclick="window.open(`/purchases/form/<%=purchaseInfo.id%>`, `smartForm`, `height=560,width=720`)">≡</button>
-          <button class="action-button" style="color:red" onclick="deleteEntry(`/api/purchase`, <%=purchaseInfo.id%>)">✖</button>
+          <button class="action-button" title="Edit" onclick="openPurchaseForm(<%=purchaseInfo.id%>)">≡</button>
+          <button class="action-button" style="color:red" onclick="deletePurchase(<%=purchaseInfo.id%>)">✖</button>
         </td>
       </tr><%})%>
       <tr>
@@ -144,7 +147,7 @@
   <p>There are no entries to show.</p><%}%>
   <div class="foot-buttons-box">
     <button onclick="filtersBox.style.display=`block`">FILTERS</button>
-    <button onclick="window.open(`/purchases/form`, `smartForm`, `height=560,width=720`)">INSERT</button>
+    <button onclick="openPurchaseForm()">INSERT</button>
   </div>
 </div>
 </body>

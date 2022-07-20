@@ -48,17 +48,10 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
-/* select:first-child, input:first-child {
-  margin-top: 3px;
-}
-select:last-child, input:last-child {
-  margin-bottom: 3px;
-} */
 select, input:not([type=checkbox]):not([type=radio]) {
   margin: 6px auto;
   border: 0;
   border-radius: 4px;
-  width: 95%;
 }
 
 .no-highlight {

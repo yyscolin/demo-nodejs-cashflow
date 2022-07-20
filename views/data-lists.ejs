@@ -1,0 +1,12 @@
+<script src="/scripts/data-lists.src.js"></script>
+<div><%
+  Object.entries(dataLists).forEach(([listKey, listOptions]) => {%>
+    <datalist id="<%=listKey%>-list"><%
+      const sortMethod = (a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1
+      listOptions = listOptions.sort(sortMethod)
+      listOptions.forEach(listOption => {%>
+        <option value="<%=listOption%>"><%
+      })%>
+    </datalist><%
+  })%>
+</div>
