@@ -7,7 +7,8 @@ const transfersModel = require(`../models/transfers`)
 
 async function renderWeeklyCashFlowPage(req, res) {
   try {
-    const systemStartDate = new Date(process.env.SYSTEM_START_DATE)
+    const systemStartString = process.env.SYSTEM_START_DATE + ` 00:00:00`
+    const systemStartDate = new Date(systemStartString)
     const systemStartTime = systemStartDate.getTime()
     const timeSinceSystemStart = new Date().getTime() - systemStartTime
     const weeksSinceSystemStart = timeSinceSystemStart / 7 / 24 / 60 / 60 / 1000
