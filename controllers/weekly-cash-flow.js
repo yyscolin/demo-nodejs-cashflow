@@ -5,12 +5,22 @@ const purchasesModel = require(`../models/purchases`)
 const purCatsModel = require(`../models/purchase-categories`)
 const transfersModel = require(`../models/transfers`)
 
+function getGmtMins(dateTime) {
+  const timeString = dateTime.toString()
+  const prefix = timeString.substring(28, 29)
+  const gmtHrs = parseInt(timeString.substring(29, 31))
+  const gmtMins = parseInt(timeString.substring(31, 33))
+  return (gmtHrs * 60 + gmtMins) * (prefix == `-` ? -1 : 1)
+}
+
 async function renderWeeklyCashFlowPage(req, res) {
   try {
     const systemStartString = process.env.SYSTEM_START_DATE + ` 00:00:00`
     const systemStartDate = new Date(systemStartString)
     const systemStartTime = systemStartDate.getTime()
-    const timeSinceSystemStart = new Date().getTime() - systemStartTime
+    const timeNow = new Date()
+    const gmtMinsNow = getGmtMins(timeNow)
+    const timeSinceSystemStart = timeNow.getTime() - systemStartTime
     const weeksSinceSystemStart = timeSinceSystemStart / 7 / 24 / 60 / 60 / 1000
     const currentWeekNo = Math.ceil(weeksSinceSystemStart)
 
@@ -37,8 +47,17 @@ async function renderWeeklyCashFlowPage(req, res) {
     ] = [-1, 0, 6].map(daysDiplacement => {
       const daysSinceSystemStart = weekIndex * 7 + daysDiplacement
       const timeSinceSystemStart = daysSinceSystemStart * 24 * 60 * 60 * 1000
-      const timestamp = systemStartTime + timeSinceSystemStart
-      return new Date(timestamp).toLocaleDateString(`fr-CA`)
+      let timestamp = systemStartTime + timeSinceSystemStart
+      let relativeDate = new Date(timestamp)
+
+      const relativeGmtMins = getGmtMins(relativeDate)
+      const diffGmtMins = gmtMinsNow - relativeGmtMins
+      if (diffGmtMins) {
+        timestamp += diffGmtMins * 60 * 1000
+        relativeDate = new Date(timestamp)
+      }
+
+      return relativeDate.toLocaleDateString(`fr-CA`)
     })
 
     const [
