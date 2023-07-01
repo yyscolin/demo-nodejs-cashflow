@@ -8,13 +8,11 @@ document.querySelectorAll(`.smart-filter-display`).forEach(_ => {
 
 document.querySelectorAll(`.smart-filter-input`).forEach(_ => {
   _.oninput = function() {
-    let list = this.parentNode.querySelector(`.smart-filter-list`)
-    let options = list.children
-    for (let i = 0; i < options.length; i++) {
-      let option = options[i]
-      const isMatch = option.getAttribute(`data-name`) == this.value
-      option.style.display = isMatch ? `block` : `none`
-    }
+    $(this).siblings(`.smart-filter-list`).children().each((i, listOption) => {
+      const dataName = $(listOption).attr(`data-name`).toLowerCase()
+      const isMatch = !this.value || dataName.includes(this.value.toLowerCase())
+      $(listOption).css(`display`, isMatch ? `block` : `none`)
+    })
   }
   _.onblur = function(event) {
     let target = event.relatedTarget
