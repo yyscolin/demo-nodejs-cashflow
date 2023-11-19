@@ -17,45 +17,55 @@
     max-width: 720px;
     width: 100%;
   }
-  #navbar {
+  nav {
     margin: 0 30px;
     position: absolute;
     right: 0;
     top: 56px
   }
-  #navbar>div {
+
+  .nav-item {
+    color: white;
+    margin: 0 20px;
+    text-decoration: none;
+  }
+
+  /* nav>div {
     display: inline-block;
     vertical-align: top;
   }
-  #navbar>div.selected {
+  nav>div.selected {
     background-color: white;
     color: #2E64FE;
   }
-  #navbar h3, #navbar p {
+  nav h3, nav p {
     margin: 0;
     padding: 16px 24px;
     width: 96px;
   }
-  #navbar>div>h3 {
+  nav>div>h3 {
     cursor: default;
   }
-  #navbar>div>p {
+  nav>div>p {
     background-color: #2E64FE;
     color: white;
     cursor: pointer;
     display: none;
   }
-  #navbar>div.selected>p {
+  nav>div.selected>p {
     display: block;
   }
-  #navbar>div>p:hover {
+  nav>div>p:hover {
     background-color: black;
-  }
+  } */
 </style>
 <div id="banner">
   <h1>Finance Book</h1>
-  <div id="navbar">
-    <div>
+  <nav>
+    <a class="nav-item" href="/purchases">Purchases</a>
+    <a class="nav-item" href="/balances">Account Balances</a>
+    <a class="nav-item" href="/weekly-cash-flow">Weekly Cash Flow</a>
+    <!-- <div>
       <h3>Pages</h3>
       <p onclick="window.location.href=`/purchases`">Purchases</p>
       <p onclick="window.location.href=`/balances`">Account Balances</p>
@@ -67,9 +77,9 @@
       <p onclick="window.location.href=`/business-entities`">Business Entities</p>
       <p onclick="window.location.href=`/purchase-categories`">Purchase Categories</p>
       <p onclick="window.location.href=`/transfer-types`">Transfer Types</p>
-    </div>
-  </div>
-  <script>
+    </div>-->
+  </nav>
+  <!-- <script>
     navbar.querySelectorAll(`div`).forEach(_ => {
       _.onclick = function() {
         let items = this.parentNode.querySelectorAll(`div`)
@@ -87,5 +97,5 @@
         this.classList.remove(`selected`)
       }
     })
-  </script>
+  </script> -->
 </div>
