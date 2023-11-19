@@ -1,6 +1,6 @@
 const mysql = require(`mysql`)
 
-const mysqlConnection = mysql.createConnection({
+const mysqlConnection = mysql.createPool({
   host: process.env.MYSQL_HOST || `localhost`,
   user: process.env.MYSQL_USER,
   port: process.env.MYSQL_PORT || 3306,
@@ -9,9 +9,13 @@ const mysqlConnection = mysql.createConnection({
   multipleStatements: true,
 })
 
-mysqlConnection.connect(err => {
-  if (err) console.log(err.message)
-  else console.log(`Established connection with MySQL Database`)
+mysqlConnection.getConnection((error, connection) => {
+  if (error) {
+    throw error
+  }
+
+  console.log(`Established connection with MySQL Database`)
+  connection.release()
 })
 
 mysqlConnection.postQuery = function(query, params = []) {

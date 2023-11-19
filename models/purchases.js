@@ -15,11 +15,16 @@ async function addOrEditPayments(purchaseId, newPayments=[], oldPayments=[]) {
     const sqlQuery = `
       UPDATE payments
       SET payment_date=?, account_id=?, payment_amount=?
-      WHERE payment_id=?`
-    const sqlQueries = oldPayments.map(payment => mysqlConnection.format(
-      sqlQuery, [payment.date, payment.accountId, payment.amount, payment.id]
-    ))
-    await mysqlConnection.postQuery(sqlQueries.join(`;`))
+      WHERE payment_id=?;`
+
+    let sqlQueries = ``
+    let sqlData = []
+
+    oldPayments.forEach(payment => {
+      sqlQueries += sqlQuery
+      sqlData.push(payment.date, payment.accountId, payment.amount, payment.id)
+    })
+    await mysqlConnection.postQuery(sqlQueries, sqlData)
   }
 }
 
