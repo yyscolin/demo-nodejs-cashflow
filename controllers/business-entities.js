@@ -1,12 +1,16 @@
 const fieldValidator = require(`../modules/field-validator`)
 const busEntitiesModel = require(`../models/business-entities`)
 
+const isDemo = process.env.IS_DEMO?.toLowerCase() == "true"
+
 async function addBusinessEntity(req, res) {
   try {
     const entityName = req.body.name
 
     const apiError = fieldValidator.checkString(`Account Name`, entityName, 48)
     if (apiError) return res.status(400).send(apiError)
+
+    if (isDemo) return res.status(202).send()
 
     await busEntitiesModel.addBusinessEntity(entityName)
     res.send()
@@ -22,6 +26,8 @@ async function deleteBusinessEntity(req, res) {
 
     const apiError = fieldValidator.checkId(`Business entity ID`, entityId)
     if (apiError) return res.status(400).send(apiError)
+
+    if (isDemo) return res.status(202).send()
 
     await busEntitiesModel.deleteBusinessEntity(entityId)
     res.send()
@@ -42,6 +48,8 @@ async function editBusinessEntity(req, res) {
     ]
     for (const apiError of apiErrors)
       if (apiError) return res.status(400).send(apiError)
+
+    if (isDemo) return res.status(202).send()
 
     await busEntitiesModel.editBusinessEntity(entityId, entityName)
     res.send()

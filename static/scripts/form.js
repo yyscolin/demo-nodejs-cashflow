@@ -44,6 +44,10 @@ function sendPayload(payload, endpoint, method) {
           window.location.reload(true)
         }
         break
+      case 202:
+        window.alert(`Demo site - No data was written`)
+        window.close()
+        break
       case 400:
         if (messageBox) {
           messageBox.innerHTML = xhr.responseText

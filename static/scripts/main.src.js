@@ -27,6 +27,15 @@ async function deleteEntry(entryType, rowId) {
     contentType: `application/json`,
     data: JSON.stringify({id: rowId}),
     success: async (data, textStatus, jqXHR) => {
+      if (jqXHR?.status == 202) {
+        await openPromptWindow(
+          `Submission Successful`,
+          `However, this is a demo website, so no data was written`,
+          [`OK`]
+        )
+        return
+      }
+
       switch (entryType) {
         case `purchase`:
           resetPurchaseForm()

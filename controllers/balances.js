@@ -1,6 +1,8 @@
 const fieldValidator = require(`../modules/field-validator`)
 const balancesModel = require(`../models/balances`)
 
+const isDemo = process.env.IS_DEMO?.toLowerCase() == "true"
+
 async function putBalances(req, res) {
   try {
     const balancesInfo = req.body.balances
@@ -22,6 +24,8 @@ async function putBalances(req, res) {
 
       balancesInfo[i] = [accountingDate, accountId, balanceAmount]
     }
+
+    if (isDemo) return res.status(202).send()
 
     await balancesModel.putBalances(balancesInfo)
     res.send()

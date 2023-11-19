@@ -1,11 +1,14 @@
 const fieldValidator = require(`../modules/field-validator`)
 const accountsModel = require(`../models/accounts`)
 
+const isDemo = process.env.IS_DEMO?.toLowerCase() == "true"
+
 async function deleteAccount(req, res) {
   try {
     const {id: accountId} = req.body
     const apiError = fieldValidator.checkId(`Account ID`, accountId)
     if (apiError) return res.status(400).send(apiError)
+    if (isDemo) return res.status(202).send()
     await accountsModel.deleteAccount(accountId)
     res.send()
   } catch(err) {
@@ -25,6 +28,8 @@ async function addAccount(req, res) {
     ]
     for (const apiError of apiErrors)
       if (apiError) return res.status(400).send(apiError)
+
+    if (isDemo) return res.status(202).send()
 
     await accountsModel.addAccount(accountName, accountCurrency)
     res.send()
@@ -47,6 +52,8 @@ async function editAccount(req, res) {
     ]
     for (const apiError of apiErrors)
       if (apiError) return res.status(400).send(apiError)
+
+    if (isDemo) return res.status(202).send()
 
     await accountsModel.editAccount(accountId, accountName, accountCurrency)
     res.send()

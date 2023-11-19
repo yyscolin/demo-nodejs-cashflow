@@ -1,6 +1,8 @@
 const fieldValidator = require(`../modules/field-validator`)
 const purCategoriesModel = require(`../models/purchase-categories`)
 
+const isDemo = process.env.IS_DEMO?.toLowerCase() == "true"
+
 async function addPurCategory(req, res) {
   try {
     const categoryName = req.body.name
@@ -19,6 +21,8 @@ async function addPurCategory(req, res) {
     for (const apiError of apiErrors)
       if (apiError) return res.status(400).send(apiError)
 
+    if (isDemo) return res.status(202).send()
+
     const superCatId = superCatName
       ? await purCategoriesModel.getPurchaseCatId(superCatName)
       : null
@@ -36,6 +40,8 @@ async function deletePurCategory(req, res) {
 
     const apiError = fieldValidator.checkId(`Purchase category ID`, categoryId)
     if (apiError) return res.status(400).send(apiError)
+
+    if (isDemo) return res.status(202).send()
 
     await purCategoriesModel.deletePurCategory(categoryId)
     res.send()
@@ -78,6 +84,8 @@ async function editPurCategory(req, res) {
         loopSuperId = nextSuperId
       } while (loopSuperId)
     }
+
+    if (isDemo) return res.status(202).send()
 
     await purCategoriesModel.editPurCategory(categoryId, categoryName, superCatId)
     res.send()

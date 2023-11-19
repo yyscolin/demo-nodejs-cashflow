@@ -2,6 +2,8 @@ const accountsModel = require(`../models/accounts`)
 const fieldValidator = require(`../modules/field-validator`)
 const transfersModel = require(`../models/transfers`)
 
+const isDemo = process.env.IS_DEMO?.toLowerCase() == "true"
+
 async function addExternalTransfer(req, res) {
   try {
     const transferDate = req.body.date
@@ -17,6 +19,8 @@ async function addExternalTransfer(req, res) {
     ]
     for (const apiError of apiErrors)
       if (apiError) return res.status(400).send(apiError)
+
+    if (isDemo) return res.status(202).send()
 
     const typeId = await transfersModel.getExtTransferTypeId(transferType)
 
@@ -36,6 +40,8 @@ async function addExtTransferType(req, res) {
 
     const apiError = fieldValidator.checkString(`Account name`, typeName, 48)
     if (apiError) return res.status(400).send(apiError)
+
+    if (isDemo) return res.status(202).send()
 
     await transfersModel.addExtTransferType(typeName)
     return res.send()
@@ -63,6 +69,8 @@ async function addInternalTransfer(req, res) {
     for (const apiError of apiErrors)
       if (apiError) return res.status(400).send(apiError)
 
+    if (isDemo) return res.status(202).send()
+
     await transfersModel.addInternalTransfer(
       transferDate, sourceAccount, sourceAmount, targetAccount, targetAmount
     )
@@ -80,6 +88,8 @@ async function deleteExtTransfer(req, res) {
     const apiError = fieldValidator.checkId(`Transfer ID`, transferId)
     if (apiError) return res.status(400).send(apiError)
 
+    if (isDemo) return res.status(202).send()
+
     await transfersModel.deleteExtTransfer(transferId)
     res.send()
   } catch(err) {
@@ -95,6 +105,8 @@ async function deleteExtTransferType(req, res) {
     const apiError = fieldValidator.checkId(`Transfer type ID`, transTypeId)
     if (apiError) return res.status(400).send(apiError)
 
+    if (isDemo) return res.status(202).send()
+
     await transfersModel.deleteExtTransferType(transTypeId)
     res.send()
   } catch(err) {
@@ -109,6 +121,8 @@ async function deleteIntTransfer(req, res) {
 
     const apiError = fieldValidator.checkId(`Transfer ID`, transferId)
     if (apiError) return res.status(400).send(apiError)
+
+    if (isDemo) return res.status(202).send()
 
     await transfersModel.deleteIntTransfer(transferId)
     res.send()
@@ -136,6 +150,8 @@ async function editExternalTransfer(req, res) {
     for (const apiError of apiErrors)
       if (apiError) return res.status(400).send(apiError)
 
+    if (isDemo) return res.status(202).send()
+
     const typeId = await transfersModel.getExtTransferTypeId(transferType)
 
     await transfersModel.editExternalTransfer(
@@ -159,6 +175,8 @@ async function editExtTransferType(req, res) {
     ]
     for (const apiError of apiErrors)
       if (apiError) return res.status(400).send(apiError)
+
+    if (isDemo) return res.status(202).send()
 
     await transfersModel.editExtTransferType(typeId, typeName)
     res.send()
@@ -187,6 +205,8 @@ async function editInternalTransfer(req, res) {
     ]
     for (const apiError of apiErrors)
       if (apiError) return res.status(400).send(apiError)
+
+    if (isDemo) return res.status(202).send()
 
     await transfersModel.editInternalTransfer(
       transferId, transferDate, sourceAccount,

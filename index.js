@@ -19,6 +19,8 @@ const purchasesController = require(`./controllers/purchases`)
 const transfersController = require(`./controllers/transfers`)
 const weeklyCFController = require(`./controllers/weekly-cash-flow`)
 
+const isDemo = process.env.IS_DEMO?.toLowerCase() == "true"
+
 /** bodyparser middleware */
 app.use(bodyParser.json({limit: `50mb`}))
 app.use(bodyParser.urlencoded({limit: `50mb`, extended: true}))
@@ -55,7 +57,7 @@ app.use((req, res, next) => {
     new RegExp(`192\.168\.[0-9]{1,3}\.[0-9]{1,3}`),
   ]
   const isBypass = bypassIps.find(_ => _.test(req.hostname)) != undefined
-  if (isAuthorised || isBypass)
+  if (isAuthorised || isBypass || isDemo)
     next()
   else
     res.render(`login`)

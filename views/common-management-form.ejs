@@ -74,11 +74,20 @@
       contentType: `application/json`,
       data: JSON.stringify(payload),
       success: async (data, textStatus, jqXHR) => {
-        await openPromptWindow(
-          `Submission Completed`,
-          `Form has been successfully submitted`,
-          [`OK`]
-        )
+        if (jqXHR?.status == 202) {
+          await openPromptWindow(
+            `Submission Successful`,
+            `However, this is a demo website, so no data was written`,
+            [`OK`]
+          )
+        } else {
+          await openPromptWindow(
+            `Submission Completed`,
+            `Form has been successfully submitted`,
+            [`OK`]
+          )
+        }
+
         window.location.reload()
       },
       error: handleAjaxError,

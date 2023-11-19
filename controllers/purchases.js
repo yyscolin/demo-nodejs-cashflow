@@ -4,6 +4,8 @@ const fieldValidator = require(`../modules/field-validator`)
 const purchasesModel = require(`../models/purchases`)
 const purCatsModel = require(`../models/purchase-categories`)
 
+const isDemo = process.env.IS_DEMO?.toLowerCase() == "true"
+
 async function addOrEditPurchase(req, res) {
   try {
     const purchaseId = req.body.id
@@ -37,14 +39,16 @@ async function addOrEditPurchase(req, res) {
         if (apiError) return res.status(400).send(apiError)
     }
 
+    if (isDemo) return res.status(202).send()
+
     const newPayments = payments.filter(({id}) => !id)
     const oldPayments = payments.filter(({id}) => id)
-    
+
     const oldPayIds = oldPayments.map(({id}) => parseInt(id))
     const nonExistPayIds = await purchasesModel.getNonExistPayments(oldPayIds)
     if (nonExistPayIds.length)
       return res.status(400).send(`Invalid payment ID(s) given`)
-    
+
     const [purCatId, busEntId] = await Promise.all([
       purCatsModel.getPurchaseCatId(purCatName),
       busEntsModel.getBusEntityId(busEntName),
@@ -85,6 +89,8 @@ async function deletePayment(req, res) {
     const apiError = fieldValidator.checkId(`Payment ID`, paymentId)
     if (apiError) return res.status(400).send(apiError)
 
+    if (isDemo) return res.status(202).send()
+
     await purchasesModel.deletePayment(paymentId)
     res.send()
   } catch(err) {
@@ -99,6 +105,8 @@ async function deletePurchase(req, res) {
 
     const apiError = fieldValidator.checkId(`Purchase ID`, purchaseId)
     if (apiError) return res.status(400).send(apiError)
+
+    if (isDemo) return res.status(202).send()
 
     await purchasesModel.deletePurchase(purchaseId)
     res.send()

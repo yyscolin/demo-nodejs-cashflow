@@ -89,16 +89,26 @@ function submitPurchaseForm(purchaseId) {
     data: JSON.stringify(payload),
     success: async (data, textStatus, jqXHR) => {
       resetPurchaseForm()
-      if (payload.category)
-        appendDataList(`purchase-categories-list`, payload.category)
-      if (payload.entity)
-        appendDataList(`business-entities-list`, payload.entity)
-      appendDataList(`currencies-list`, payload.currency)
-      await openPromptWindow(
-        `Submission Completed`,
-        `Form has been successfully submitted`,
-        [`OK`]
-      )
+
+      if (jqXHR?.status == 202) {
+        await openPromptWindow(
+          `Submission Successful`,
+          `However, this is a demo website, so no data was written`,
+          [`OK`]
+        )
+      } else {
+        if (payload.category)
+          appendDataList(`purchase-categories-list`, payload.category)
+        if (payload.entity)
+          appendDataList(`business-entities-list`, payload.entity)
+        appendDataList(`currencies-list`, payload.currency)
+        await openPromptWindow(
+          `Submission Completed`,
+          `Form has been successfully submitted`,
+          [`OK`]
+        )
+      }
+
       window.location.reload()
     },
     error: handleAjaxError,
