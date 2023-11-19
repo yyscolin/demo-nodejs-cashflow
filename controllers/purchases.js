@@ -227,6 +227,7 @@ async function renderPurchasesPage(req, res) {
       totalOutstandingAmt,
       dataLists,
       accountsInfo,
+      selectedCurrency: currency,
     })
   } catch(err) {
     console.error(err)

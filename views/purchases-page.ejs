@@ -115,18 +115,18 @@
   <table>
     <thead>
       <tr>
-        <th>Purchase Date</th>
+        <th>Date</th>
         <th>Purchase Category</th>
         <th>Purchased From</th>
-        <th>Purchase Amount</th>
-        <th>Outstanding Payment</th>
+        <th>Amount (<%= selectedCurrency %>)</th>
+        <th>Outstanding Amount</th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody><%purchasesInfo.forEach(purchaseInfo => {
       if (purchaseInfo.remarks) purchaseInfo.itm += `${/ /.test(purchaseInfo.remarks)?`<br>`:` `}${purchaseInfo.remarks}`%>
       <tr data-purchase-id="<%=purchaseInfo.id%>">
-        <td style="width:90px"><p><%=purchaseInfo.date%></p></td>
+        <td style="width:110px"><p><%=purchaseInfo.date%></p></td>
         <td style="width:180px" title="<%=purchaseInfo.remarks%>"><p><%-purchaseInfo.itm%></p></td>
         <td style="width:180px"><p><%=purchaseInfo.ent%></p></td>
         <td style="width:90px"><p><%=purchaseInfo.buy%></p></td>
