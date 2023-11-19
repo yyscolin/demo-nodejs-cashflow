@@ -5,6 +5,9 @@ const purchasesModel = require(`../models/purchases`)
 const purCatsModel = require(`../models/purchase-categories`)
 const transfersModel = require(`../models/transfers`)
 
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
 async function renderWeeklyCashFlowPage(req, res) {
   try {
     const datetimeNow = new Date()
@@ -44,6 +47,10 @@ async function renderWeeklyCashFlowPage(req, res) {
       const timestamp = systemStartTime + timeSinceSystemStart
       return new Date(timestamp).toLocaleDateString(`fr-CA`)
     })
+
+    const [startYear, startMonth, startDom] = dateStart.split("-")
+    const startWeek = Math.ceil(startDom / 7)
+    const weekTitle = `Week ${startWeek} ${MONTHS[startMonth - 1]} ${startYear}`
 
     const [
       accountBalancesLast, // last financial week's account balance
@@ -130,7 +137,8 @@ async function renderWeeklyCashFlowPage(req, res) {
         "purchase-categories": purchaseCategories.map(_ => _.name),
         "business-entities": businessEntities.map(_ => _.name),
         currencies,
-      }
+      },
+      weekTitle
     })
   } catch(err) {
     console.error(err)
