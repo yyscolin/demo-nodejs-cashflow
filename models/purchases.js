@@ -102,6 +102,13 @@ async function editPurchase(
   await addOrEditPayments(purchaseId, newPayments, oldPayments)
 }
 
+async function getLastDbInteractDate(currency) {
+  const sqlQuery = `
+      SELECT MAX(purchase_date) FROM purchases WHERE purchase_currency=?`
+  const lastestDate = await mysqlConnection.getValue(sqlQuery, [currency])
+  return lastestDate.toLocaleDateString(`fr-ca`)
+}
+
 async function getNonExistPayments(paymentIds=[]) {
   if (!paymentIds.length) return []
   const sqlQuery = `
@@ -215,6 +222,7 @@ module.exports = {
   deletePayment,
   deletePurchase,
   editPurchase,
+  getLastDbInteractDate,
   getNonExistPayments,
   getPaymentsInDateRange,
   getPurchaseInfo,

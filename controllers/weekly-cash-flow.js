@@ -13,13 +13,19 @@ async function renderWeeklyCashFlowPage(req, res) {
     const datetimeNow = new Date()
     const timeNow = datetimeNow.toString().split(` `)[4]
 
-    const systemStartString = process.env.SYSTEM_START_DATE + ` ` + timeNow
-    const systemStartDate = new Date(systemStartString)
+    /** Get details of the date of the last interaction with the database */
+    const lastIntString = await balancesModel.getLastDbInteractDate()
+    const lastIntDate = new Date(lastIntString + ` ` + timeNow)
+    const lastIntTime = lastIntDate.getTime()
+
+    const systemStartString = process.env.SYSTEM_START_DATE
+    const systemStartDate = new Date(systemStartString + ` ` + timeNow)
     const systemStartTime = systemStartDate.getTime()
 
-    const timeSinceSystemStart = datetimeNow.getTime() - systemStartTime
-    const weeksSinceSystemStart = timeSinceSystemStart / 7 / 24 / 60 / 60 / 1000
-    const currentWeekNo = Math.ceil(weeksSinceSystemStart)
+    /** Amount of time between the system start date and last interaction */
+    const timeDisplacement = lastIntTime - systemStartTime
+    const weeksDisplacement = timeDisplacement / 7 / 24 / 60 / 60 / 1000
+    const lastIntWeekNo = Math.ceil(weeksDisplacement)
 
     let isRedirecting = false
     let pageWeekNo = req.params.week
@@ -28,12 +34,12 @@ async function renderWeeklyCashFlowPage(req, res) {
     else {
       const isInteger = parseInt(pageWeekNo) == pageWeekNo
       const isBeforeMin = pageWeekNo < 1
-      const isAfterMax = pageWeekNo > currentWeekNo
+      const isAfterMax = pageWeekNo > lastIntWeekNo
       isRedirecting = !isInteger || isBeforeMin || isAfterMax
     }
 
     if (isRedirecting)
-      return res.redirect(`/weekly-cash-flow/${currentWeekNo}`)
+      return res.redirect(`/weekly-cash-flow/${lastIntWeekNo}`)
 
     pageWeekNo = parseInt(pageWeekNo)
     const weekIndex = pageWeekNo - 1
@@ -127,7 +133,7 @@ async function renderWeeklyCashFlowPage(req, res) {
       dateStart,
       dateEnd,
       pageWeekNo,
-      currentWeekNo,
+      weekNo: lastIntWeekNo,
       accountBalances,
       internalTransfers,
       externalTransfers,

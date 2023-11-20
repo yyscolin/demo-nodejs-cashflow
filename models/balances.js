@@ -36,6 +36,20 @@ function getCurrentBalances(cutOffDate) {
   return mysqlConnection.getObjects(sqlQuery, [cutOffDate])
 }
 
+async function getLastDbInteractDate() {
+  const sqlQuery = `
+    SELECT MAX(max_date)
+    FROM (
+      SELECT MAX(balance_date) AS max_date FROM account_balances
+      UNION SELECT MAX(payment_date) FROM payments
+      UNION SELECT MAX(external_transfer_date) FROM external_transfers
+      UNION SELECT MAX(internal_transfer_date) FROM internal_transfers
+    ) t
+  `
+  const lastestDate = await mysqlConnection.getValue(sqlQuery)
+  return lastestDate.toLocaleDateString(`fr-ca`)
+}
+
 function putBalances(balancesInfo) {
   const sqlQuery = `
     INSERT INTO account_balances (balance_date, account_id, balance_amount) VALUES ?
@@ -48,5 +62,6 @@ function putBalances(balancesInfo) {
 module.exports = {
   getBalancesOfWeek,
   getCurrentBalances,
+  getLastDbInteractDate,
   putBalances,
 }

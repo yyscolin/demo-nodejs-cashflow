@@ -131,24 +131,26 @@ async function renderPurchasesPage(req, res) {
   try {
     let isRedirecting = false
 
+    const currency = req.query.currency
+    if (req.query.currency == undefined) {
+      req.query.currency = `AUD`
+      isRedirecting = true
+    }
+
     let dateEnd = req.query[`date-end`]
     if (dateEnd == undefined) {
-      req.query[`date-end`] = new Date().toLocaleDateString(`fr-CA`)
+      req.query[`date-end`] = await purchasesModel.getLastDbInteractDate(
+        req.query.currency
+      )
       isRedirecting = true
     }
 
     let dateStart = req.query[`date-start`]
     if (dateStart == undefined) {
       const dateEndTimestamp = new Date(req.query[`date-end`]).getTime()
-      const timeDelta = 7 * 24 * 60 * 60 * 1000
+      const timeDelta = 4 * 7 * 24 * 60 * 60 * 1000 // 4 weeks
       req.query[`date-start`] = new Date(dateEndTimestamp - timeDelta)
         .toLocaleDateString(`fr-CA`)
-      isRedirecting = true
-    }
-
-    const currency = req.query.currency
-    if (req.query.currency == undefined) {
-      req.query.currency = `AUD`
       isRedirecting = true
     }
 
