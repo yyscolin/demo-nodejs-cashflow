@@ -20,7 +20,7 @@ function getCurrentBalances(cutOffDate) {
   const sqlQuery = `
     SELECT account_id AS id,
       account_name AS name,
-      balance_amount AS amount
+      IFNULL(balance_amount, 0) AS amount
     FROM (
       SELECT *
       FROM account_balances
@@ -32,7 +32,7 @@ function getCurrentBalances(cutOffDate) {
         GROUP BY account_id
       ) t1 USING(balance_date, account_id)
     ) t2
-    JOIN accounts USING(account_id)`
+    RIGHT JOIN accounts USING(account_id)`
   return mysqlConnection.getObjects(sqlQuery, [cutOffDate])
 }
 
