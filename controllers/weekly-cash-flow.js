@@ -22,10 +22,15 @@ async function renderWeeklyCashFlowPage(req, res) {
     const systemStartDate = new Date(systemStartString + ` ` + timeNow)
     const systemStartTime = systemStartDate.getTime()
 
-    /** Amount of time between the system start date and last interaction */
-    const timeDisplacement = lastIntTime - systemStartTime
-    const weeksDisplacement = timeDisplacement / 7 / 24 / 60 / 60 / 1000
+    /** Get week number of the last interaction */
+    let timeDisplacement = lastIntTime - systemStartTime
+    let weeksDisplacement = timeDisplacement / 7 / 24 / 60 / 60 / 1000
     const lastIntWeekNo = Math.ceil(weeksDisplacement)
+
+    /** Get the current week number */
+    timeDisplacement = datetimeNow.getTime() - systemStartTime
+    weeksDisplacement = timeDisplacement / 7 / 24 / 60 / 60 / 1000
+    const thisWeekNo = Math.ceil(weeksDisplacement)
 
     let isRedirecting = false
     let pageWeekNo = req.params.week
@@ -34,7 +39,7 @@ async function renderWeeklyCashFlowPage(req, res) {
     else {
       const isInteger = parseInt(pageWeekNo) == pageWeekNo
       const isBeforeMin = pageWeekNo < 1
-      const isAfterMax = pageWeekNo > lastIntWeekNo
+      const isAfterMax = pageWeekNo > thisWeekNo
       isRedirecting = !isInteger || isBeforeMin || isAfterMax
     }
 
@@ -133,7 +138,7 @@ async function renderWeeklyCashFlowPage(req, res) {
       dateStart,
       dateEnd,
       pageWeekNo,
-      weekNo: lastIntWeekNo,
+      thisWeekNo,
       accountBalances,
       internalTransfers,
       externalTransfers,
