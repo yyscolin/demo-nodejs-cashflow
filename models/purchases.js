@@ -105,8 +105,14 @@ async function editPurchase(
 async function getLastDbInteractDate(currency) {
   const sqlQuery = `
       SELECT MAX(purchase_date) FROM purchases WHERE purchase_currency=?`
-  const lastestDate = await mysqlConnection.getValue(sqlQuery, [currency])
-  return lastestDate.toLocaleDateString(`fr-ca`)
+  let lastestDate = await mysqlConnection.getValue(sqlQuery, [currency])
+  lastestDate = lastestDate?.toLocaleDateString(`fr-ca`)
+
+  if (!lastestDate) {
+    lastestDate = process.env.SYSTEM_START_DATE
+  }
+
+  return lastestDate
 }
 
 async function getNonExistPayments(paymentIds=[]) {

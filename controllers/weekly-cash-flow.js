@@ -25,7 +25,7 @@ async function renderWeeklyCashFlowPage(req, res) {
     /** Get week number of the last interaction */
     let timeDisplacement = lastIntTime - systemStartTime
     let weeksDisplacement = timeDisplacement / 7 / 24 / 60 / 60 / 1000
-    const lastIntWeekNo = Math.ceil(weeksDisplacement)
+    const lastIntWeekNo = Math.max(Math.ceil(weeksDisplacement), 1)
 
     /** Get the current week number */
     timeDisplacement = datetimeNow.getTime() - systemStartTime
