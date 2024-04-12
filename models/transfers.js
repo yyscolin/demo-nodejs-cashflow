@@ -95,7 +95,7 @@ function editInternalTransfer(
 function getExternalTransferInfo(transferId) {
   const sqlQuery = `
     SELECT external_transfer_id AS id,
-      DATE_FORMAT(external_transfer_date, "%Y-%m-%d") AS date,
+      DATE_FORMAT(external_transfer_date, '%Y-%m-%d') AS date,
       transfer_type_name AS transferType,
       account_id AS acc,
       external_transfer_amount AS amount,
@@ -130,7 +130,7 @@ function getExtTransferTypes() {
 function getExternalTransfersInDateRange(dateStart, dateEnd) {
   const sqlQuery = `
     SELECT external_transfer_id AS id,
-      DATE_FORMAT(external_transfer_date, "%Y-%m-%d") AS date,
+      DATE_FORMAT(external_transfer_date, '%Y-%m-%d') AS date,
       transfer_type_name AS transferType,
       account_id AS accountId,
       account_name AS accountName,
@@ -148,7 +148,7 @@ function getExternalTransfersInDateRange(dateStart, dateEnd) {
 function getInternalTransferInfo(transferId) {
   const sqlQuery = `
     SELECT internal_transfer_id AS id,
-      DATE_FORMAT(internal_transfer_date, "%Y-%m-%d") AS date,
+      DATE_FORMAT(internal_transfer_date, '%Y-%m-%d') AS date,
       source_account_id AS sourceAccount,
       source_amount AS sourceAmount,
       destination_account_id AS targetAccount,
@@ -161,7 +161,7 @@ function getInternalTransferInfo(transferId) {
 function getInternalTransfersInDateRange(dateStart, dateEnd) {
   const sqlQuery = `
     SELECT internal_transfer_id AS id,
-      DATE_FORMAT(internal_transfer_date, "%Y-%m-%d") AS date,
+      DATE_FORMAT(internal_transfer_date, '%Y-%m-%d') AS date,
       source_account_id AS sourceAccountId,
       destination_account_id AS targetAccountId,
       t1.account_name AS sourceAccountName,

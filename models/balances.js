@@ -4,7 +4,7 @@ function getBalancesOfWeek(accountingDate) {
   const sqlQuery = `
     SELECT account_id AS accountId,
       account_name AS accountName,
-      IFNULL(balance_amount, "") AS amount
+      IFNULL(balance_amount, '') AS amount
     FROM accounts
     LEFT JOIN (
       SELECT account_id,

@@ -128,7 +128,7 @@ async function getPaymentsInDateRange(dateStart, dateEnd) {
   const sqlQuery = `
     SELECT payment_id AS paymentId,
       purchase_id AS purchaseId,
-      DATE_FORMAT(payment_date, "%Y-%m-%d") AS date,
+      DATE_FORMAT(payment_date, '%Y-%m-%d') AS date,
       purchase_category_name AS purchaseCategory,
       account_id AS accountId,
       account_name AS accountName,
@@ -148,7 +148,7 @@ async function getPaymentsInDateRange(dateStart, dateEnd) {
 async function getPurchaseInfo(purchaseId) {
   const sqlQuery1 = `
     SELECT purchase_id AS id,
-      DATE_FORMAT(purchase_date, "%Y-%m-%d") AS date,
+      DATE_FORMAT(purchase_date, '%Y-%m-%d') AS date,
       purchase_category_name AS purchaseCategory,
       purchase_currency AS currency,
       purchase_amount AS amount,
@@ -164,7 +164,7 @@ async function getPurchaseInfo(purchaseId) {
 
   const sqlQuery2 = `
     SELECT payment_id AS id,
-      DATE_FORMAT(payment_date, "%Y-%m-%d") AS date,
+      DATE_FORMAT(payment_date, '%Y-%m-%d') AS date,
       account_id AS accountId,
       payment_amount AS amount
     FROM payments
@@ -179,7 +179,7 @@ function getPurchasesInfo(sqlConditions) {
 
   let sqlQuery = `
     SELECT purchase_id AS id,
-      DATE_FORMAT(purchase_date, "%Y-%m-%d") AS date,
+      DATE_FORMAT(purchase_date, '%Y-%m-%d') AS date,
       purchase_category_name AS itm,
       business_entity_name AS ent,
       purchase_amount AS buy,
